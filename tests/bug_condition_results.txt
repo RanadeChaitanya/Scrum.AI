@@ -1,0 +1,70 @@
+Bug Condition Exploration Test Results
+======================================
+Run on: UNFIXED codebase
+Command: pytest tests/test_bug_condition.py -v --tb=line
+Result: 8 FAILED, 0 passed (EXPECTED — failures confirm bugs exist)
+
+Each test asserts the CORRECT behavior. Because the code is buggy, the
+assertions fail — which is the desired outcome for this task.
+
+--------------------------------------------------------------------------------
+FAILED test_1_7_diarize_should_produce_2d_tensor
+  Counterexample: torch.from_numpy(np.zeros(16000, dtype=np.float32)).dim() == 1
+  Bug confirmed: Missing .unsqueeze(0) — tensor is 1-D, pyannote requires 2-D.
+  Error: AssertionError: Bug 1.7 confirmed: torch.from_numpy produces 1-D tensor
+         (dim=1). Missing .unsqueeze(0) call. pyannote requires shape (channels, samples).
+
+FAILED test_1_8_stop_session_should_complete_within_timeout
+  Counterexample: stop_session("s1") with 2 buffered events, timeout=0.25s
+  Bug confirmed: _align_and_fuse called 2 times (once per loop iteration) instead
+                 of once. Total sleep = 300ms > 250ms timeout → TimeoutError.
+  Error: TimeoutError (asyncio.wait_for exceeded 0.25s)
+
+FAILED test_1_9_two_audio_events_produce_exactly_two_publishes
+  Counterexample: process_audio_event × 2 → redis.publish_event called 3 times
+  Bug confirmed: Buffer never cleared after fusion. 1st call: 1 publish.
+                 2nd call: re-processes both events → 2 more publishes. Total: 3.
+  Error: AssertionError: Bug 1.9 confirmed: expected 2 Redis publish calls
+         (one per event), got 3. Buffer is never cleared after fusion.
+
+FAILED test_1_10_parse_scrum_update_null_task_returns_none
+  Counterexample: _parse_scrum_update('{"task": null, "status": "todo"}', 0.0)
+  Bug confirmed: Returns ScrumUpdate(task='', ...) instead of None.
+                 `data.get("task") or ""` converts None → "".
+  Error: AssertionError: Bug 1.10 confirmed: _parse_scrum_update returned
+         ScrumUpdate(task='', status='todo', ...) for null task. Expected None.
+
+FAILED test_1_11_run_refinement_should_succeed_with_do_sample
+  Counterexample: model.generate(inputs, max_new_tokens=512, temperature=0.5)
+                  (without do_sample=True)
+  Bug confirmed: ValueError raised: "You have set temperature to 0.5, but
+                 do_sample=False. Set do_sample=True or temperature=1."
+                 _run_refinement catches it and returns {} (empty dict).
+  Error: AssertionError: Bug 1.11 confirmed: _run_refinement returned empty dict.
+         model.generate raised ValueError because do_sample=True is missing.
+
+FAILED test_1_12_stereo_wav_should_produce_mono_array
+  Counterexample: stereo WAV (2 channels, 16000 frames) → array shape (32000,)
+  Bug confirmed: np.frombuffer on stereo WAV produces interleaved (2N,) array.
+                 Missing: audio_array.reshape(-1, n_channels).mean(axis=1)
+  Error: AssertionError: Bug 1.12 confirmed: stereo WAV produced array of shape
+         (32000,) instead of (16000,).
+
+FAILED test_1_16_create_card_should_send_auth_as_query_params
+  Counterexample: create_card(TrelloCard(name="Test Card", idList="list123"))
+                  → JSON body = {'name': 'Test Card', 'desc': '', 'idList': 'list123',
+                                 'key': 'test_key', 'token': 'test_token'}
+  Bug confirmed: 'key' and 'token' are in the JSON body, not in query params.
+                 Trello REST API requires auth as URL query parameters → 401.
+  Error: AssertionError: Bug 1.16 confirmed: 'key' found in JSON body.
+
+FAILED test_1_17_requirements_txt_should_not_pin_invalid_torch_version
+  Counterexample: requirements.txt contains 'torch==2.11.0'
+  Bug confirmed: torch==2.11.0 was a non-existent version at audit time.
+                 Should be torch==2.2.2 (valid stable release).
+  Error: AssertionError: Bug 1.17 confirmed: requirements.txt pins 'torch==2.11.0'.
+
+--------------------------------------------------------------------------------
+Summary: All 8 bug condition tests FAILED as expected on unfixed code.
+This confirms all 8 targeted defects (1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.16, 1.17)
+are present in the codebase.

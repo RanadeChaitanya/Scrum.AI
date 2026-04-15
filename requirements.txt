@@ -1,0 +1,30 @@
+# FastAPI
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+
+# Redis
+redis==5.2.0
+
+# Vision
+Pillow>=11.1.0
+
+# WebSocket
+websockets==11.0.3
+
+# HTTP Client
+aiohttp>=3.11.7
+
+# Configuration
+pydantic-settings==2.6.1
+
+# Utilities
+numpy>=2.2.0
+typing_extensions>=4.12.2
+
+# --- AI/ML (optional — requires Python <=3.12) ---
+# Uncomment on Python 3.12 to enable diarization, transcription, and LLM features:
+# torch==2.2.2
+# transformers==4.46.3
+# pyannote.audio==3.3.2
+# accelerate==1.1.1
