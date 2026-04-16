@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>User Profile | ScrumAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f7f9fb",
+                        "on-secondary-fixed": "#002113",
+                        "tertiary-fixed-dim": "#89ceff",
+                        "surface-tint": "#006b5f",
+                        "surface-container-low": "#f2f4f6",
+                        "outline": "#6c7a77",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed": "#00201c",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "error": "#ba1a1a",
+                        "surface-dim": "#d8dadc",
+                        "surface-container-high": "#e6e8ea",
+                        "on-tertiary-container": "#003e5c",
+                        "on-primary-fixed-variant": "#005048",
+                        "surface": "#f7f9fb",
+                        "inverse-primary": "#4fdbc8",
+                        "primary-fixed-dim": "#4fdbc8",
+                        "error-container": "#ffdad6",
+                        "inverse-surface": "#2d3133",
+                        "on-secondary-fixed-variant": "#005236",
+                        "on-background": "#191c1e",
+                        "surface-variant": "#e0e3e5",
+                        "on-secondary-container": "#00714d",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "secondary": "#006c49",
+                        "on-error": "#ffffff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-tertiary": "#ffffff",
+                        "primary-container": "#14b8a6",
+                        "on-primary-container": "#00423b",
+                        "tertiary-fixed": "#c9e6ff",
+                        "secondary-container": "#6cf8bb",
+                        "outline-variant": "#bbcac6",
+                        "on-surface-variant": "#3c4947",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary": "#006591",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#71f8e4",
+                        "surface-container": "#eceef0",
+                        "on-tertiary-fixed": "#001e2f",
+                        "tertiary-container": "#27aef3",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary": "#006b5f",
+                        "on-tertiary-fixed-variant": "#004c6e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full w-64 z-50 bg-surface-container-low flex flex-col p-4 space-y-2">
+<div class="flex items-center space-x-3 px-2 py-6 mb-4">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#006b5f] to-[#14b8a6] flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<div>
+<h1 class="font-headline font-bold text-on-surface text-lg leading-none">ScrumAI</h1>
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Intelligent Pulse</p>
+</div>
+</div>
+<nav class="flex-grow space-y-1">
+<a class="flex items-center space-x-3 p-3 rounded-lg text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200" href="/dashboard">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-medium text-sm">Dashboard</span>
+</a>
+<a class="flex items-center space-x-3 p-3 rounded-lg text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200" href="/scrum-report">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+<span class="font-medium text-sm">Active Sprints</span>
+</a>
+<a class="flex items-center space-x-3 p-3 rounded-lg text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200" href="/history">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-medium text-sm">Team Insights</span>
+</a>
+<a class="flex items-center space-x-3 p-3 rounded-lg text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200" href="/trello-auth">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-medium text-sm">AI Configuration</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-outline-variant/10 space-y-1">
+<a class="flex items-center space-x-3 p-3 rounded-lg text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200" href="/profile">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-medium text-sm">Settings</span>
+</a>
+<a class="flex items-center space-x-3 p-3 rounded-lg text-slate-600 hover:bg-white/50 hover:translate-x-1 transition-all duration-200" href="/">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+<span class="font-medium text-sm">About Us</span>
+</a>
+<a class="flex items-center space-x-3 p-3 bg-white text-[#006b5f] rounded-lg shadow-sm font-bold transition-all duration-200" href="/profile">
+<span class="material-symbols-outlined" data-icon="account_circle">account_circle</span>
+<span class="font-medium text-sm">User Profile</span>
+</a>
+</div>
+</aside>
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-40 bg-[#f7f9fb]/70 backdrop-blur-xl flex justify-between items-center px-8 h-16 ml-64 shadow-sm shadow-black/5">
+<div class="flex items-center space-x-8">
+<nav class="flex items-center space-x-6">
+<a class="text-slate-500 font-medium hover:text-[#14b8a6] transition-colors duration-200" href="/dashboard">Meetings</a>
+<a class="text-slate-500 font-medium hover:text-[#14b8a6] transition-colors duration-200" href="/scrum-report">Reports</a>
+<a class="text-slate-500 font-medium hover:text-[#14b8a6] transition-colors duration-200" href="/history">History</a>
+</nav>
+</div>
+<div class="flex items-center space-x-4 pr-64">
+<button class="flex items-center space-x-2 bg-secondary-container/30 text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold active:scale-95 transition-transform">
+<span class="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+<span>Live Pulse</span>
+</button>
+<button class="text-slate-500 hover:text-[#14b8a6] transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-8 pb-12 mx-auto">
+<!-- Header Card: Bento Style Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-xl flex items-center space-x-8">
+<div class="relative group">
+<img alt="Alex Rivera Profile" class="w-32 h-32 rounded-full object-cover ring-4 ring-primary-container/20" data-alt="close-up portrait of a professional man with a kind smile, modern studio lighting, high resolution photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsD59SAjSGa7cD50Byr4iBjt3PTTha2Z3R8azlKr-V0_MnWkLmL67eIRkyNzQPjjdT1uSxQg9wh4rWv7v9Xg6RL2XJiL0hWYmKMkewhT6Rok_rOoGeomsdvZJ44WsgfUmHbPnmPNi3TsrqTU0_qfRjdBGJUKIza_nsm_dUpiUwa1dXC09oluypiSDdgqEmGpJGtz1iiqQTE1uZFu5PoXDMS7QKThBrGAv2Jtz5BAbPPrIM9CFEu1szZF2hDypScKVjP5-SeVisSg"/>
+<button class="absolute bottom-1 right-1 bg-primary text-white p-2 rounded-full shadow-lg hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="flex-grow">
+<div class="flex items-center space-x-3 mb-1">
+<h2 class="font-headline font-bold text-3xl text-on-surface">Alex Rivera</h2>
+<span class="px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase tracking-wider">Active</span>
+</div>
+<p class="text-on-surface-variant text-lg font-light mb-6">Lead Scrum Master &amp; Agile Architect</p>
+<div class="flex space-x-3">
+<button class="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-lg font-medium text-sm shadow-md shadow-primary/20 hover:opacity-90 active:scale-95 transition-all">Edit Profile</button>
+<button class="bg-surface-container-high text-on-surface px-6 py-2.5 rounded-lg font-medium text-sm hover:bg-surface-variant active:scale-95 transition-all">Share Pulse</button>
+</div>
+</div>
+</div>
+<!-- Ongoing Sprints Card (Sidebar of the Header) -->
+<div class="bg-surface-container-lowest p-6 rounded-xl">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-headline font-bold text-sm text-on-surface-variant uppercase tracking-widest">Ongoing Sprints</h3>
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-background rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-xs font-bold text-on-surface">Nexus Core Q3</h4>
+<span class="text-[10px] text-tertiary font-bold">72%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mb-2">
+<div class="bg-tertiary h-1.5 rounded-full" style="width: 72%"></div>
+</div>
+<p class="text-[10px] text-on-surface-variant flex items-center">
+<span class="material-symbols-outlined text-[12px] mr-1" data-icon="schedule">schedule</span> 3 days left
+                        </p>
+</div>
+<div class="p-3 bg-background rounded-lg">
+<div class="flex justify-between items-start mb-2">
+<h4 class="text-xs font-bold text-on-surface">UI Refactor 2.0</h4>
+<span class="text-[10px] text-secondary font-bold">94%</span>
+</div>
+<div class="w-full bg-surface-container-high h-1.5 rounded-full mb-2">
+<div class="bg-secondary h-1.5 rounded-full" style="width: 94%"></div>
+</div>
+<p class="text-[10px] text-secondary font-bold flex items-center">
+<span class="material-symbols-outlined text-[12px] mr-1" data-icon="priority_high">priority_high</span> Reviewing · Today
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Middle Row: Personal Info & Security -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+<!-- Personal Info Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl">
+<h3 class="font-headline font-bold text-sm text-on-surface-variant uppercase tracking-widest mb-6">Personal Information</h3>
+<div class="space-y-4">
+<div>
+<label class="block text-[10px] font-bold text-primary mb-1 uppercase tracking-tight">Email Address</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg text-sm px-4 py-2.5 focus:ring-2 focus:ring-primary focus:bg-white transition-all" type="text" value="alex.rivera@scrumai.io"/>
+</div>
+<div>
+<label class="block text-[10px] font-bold text-primary mb-1 uppercase tracking-tight">Contact Number</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg text-sm px-4 py-2.5 focus:ring-2 focus:ring-primary focus:bg-white transition-all" type="text" value="+1 (555) 012-3456"/>
+</div>
+<div>
+<label class="block text-[10px] font-bold text-primary mb-1 uppercase tracking-tight">Current Role</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg text-sm px-4 py-2.5 focus:ring-2 focus:ring-primary focus:bg-white transition-all" type="text" value="Lead Scrum Master"/>
+</div>
+</div>
+</div>
+<!-- Security Settings Card -->
+<div class="bg-surface-container-lowest p-6 rounded-xl flex flex-col">
+<h3 class="font-headline font-bold text-sm text-on-surface-variant uppercase tracking-widest mb-6">Security Settings</h3>
+<div class="flex-grow space-y-6">
+<div class="flex items-center justify-between p-4 bg-background rounded-xl border border-outline-variant/10">
+<div class="flex items-center space-x-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container/50 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="verified_user">verified_user</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-on-surface leading-none mb-1">Authentication Status</h4>
+<p class="text-xs text-secondary font-medium">Fully Verified &amp; Secure</p>
+</div>
+</div>
+<button class="text-primary text-xs font-bold hover:underline">Manage</button>
+</div>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="text-sm font-bold text-on-surface">Two-Factor Authentication</h4>
+<p class="text-xs text-on-surface-variant">Secure your account with MFA</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+</label>
+</div>
+<button class="w-full py-2.5 rounded-lg border-2 border-primary text-primary font-bold text-xs hover:bg-primary/5 transition-colors">Change Password</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Experience & Support -->
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+<!-- Customize Experience Card -->
+<div class="lg:col-span-3 bg-surface-container-lowest p-6 rounded-xl">
+<h3 class="font-headline font-bold text-sm text-on-surface-variant uppercase tracking-widest mb-6">Customize Experience</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="space-y-4">
+<h4 class="text-xs font-bold text-on-surface-variant border-b border-outline-variant/10 pb-2">Visibility &amp; Theme</h4>
+<div class="flex items-center justify-between">
+<span class="text-sm">Dark Mode</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm">Public Profile</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm">Searchable</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+</div>
+<div class="space-y-4">
+<h4 class="text-xs font-bold text-on-surface-variant border-b border-outline-variant/10 pb-2">Notification Center</h4>
+<div class="flex items-center justify-between">
+<span class="text-sm">AI Suggestions</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm">Direct Mentions</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-10 h-5 bg-surface-container-high rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all"></div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<!-- Support Card -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-6 rounded-xl flex flex-col">
+<h3 class="font-headline font-bold text-sm text-on-surface-variant uppercase tracking-widest mb-6">Support &amp; Docs</h3>
+<div class="flex-grow space-y-3">
+<a class="flex items-center justify-between p-3 rounded-lg hover:bg-background group transition-colors" href="#">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-primary" data-icon="description">description</span>
+<span class="text-sm font-medium">API Documentation</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</a>
+<a class="flex items-center justify-between p-3 rounded-lg hover:bg-background group transition-colors" href="#">
+<div class="flex items-center space-x-3">
+<span class="material-symbols-outlined text-primary" data-icon="forum">forum</span>
+<span class="text-sm font-medium">Community Forum</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</a>
+<div class="mt-4 pt-4 border-t border-outline-variant/10">
+<button class="w-full bg-surface-container-high text-on-surface font-bold text-sm py-3 rounded-lg hover:bg-surface-variant transition-colors flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-sm" data-icon="support_agent">support_agent</span>
+<span>Contact Support</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Intelligence Rail (Signature AI Component) -->
+</body></html>

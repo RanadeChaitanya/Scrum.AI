@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ScrumAI - Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#f7f9fb",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#006591",
+                    "on-secondary-fixed": "#002113",
+                    "outline": "#6c7a77",
+                    "surface-bright": "#f7f9fb",
+                    "surface-tint": "#006b5f",
+                    "on-primary-fixed-variant": "#005048",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed": "#71f8e4",
+                    "on-surface-variant": "#3c4947",
+                    "surface": "#f7f9fb",
+                    "surface-container-highest": "#e0e3e5",
+                    "primary": "#006b5f",
+                    "on-primary": "#ffffff",
+                    "secondary": "#006c49",
+                    "primary-container": "#14b8a6",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#27aef3",
+                    "inverse-primary": "#4fdbc8",
+                    "surface-dim": "#d8dadc",
+                    "tertiary-fixed": "#c9e6ff",
+                    "tertiary-fixed-dim": "#89ceff",
+                    "on-primary-container": "#00423b",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-primary-fixed": "#00201c",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#004c6e",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#6cf8bb",
+                    "outline-variant": "#bbcac6",
+                    "on-surface": "#191c1e",
+                    "secondary-fixed": "#6ffbbe",
+                    "surface-container-low": "#f2f4f6",
+                    "on-secondary-container": "#00714d",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-secondary-fixed-variant": "#005236",
+                    "surface-variant": "#e0e3e5",
+                    "surface-container-high": "#e6e8ea",
+                    "on-tertiary-fixed": "#001e2f",
+                    "surface-container": "#eceef0",
+                    "on-tertiary-container": "#003e5c",
+                    "on-background": "#191c1e",
+                    "primary-fixed-dim": "#4fdbc8"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .pulse-gradient {
+        background: linear-gradient(135deg, #006b5f 0%, #14b8a6 100%);
+      }
+      .glass-card {
+        backdrop-filter: blur(20px);
+        background: rgba(255, 255, 255, 0.7);
+      }
+      .glow-pulse {
+        box-shadow: 0 0 10px rgba(39, 174, 243, 0.4);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body min-h-screen overflow-x-hidden">
+<!-- Notification Toast -->
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 dark:bg-slate-900 border-r-0 flex flex-col py-6 font-['Space_Grotesk'] tracking-tight z-50">
+<div class="px-6 mb-10">
+<div class="text-xl font-bold text-teal-700 dark:text-teal-500 uppercase tracking-widest">ScrumAI</div>
+<div class="text-[10px] text-slate-500 font-medium">Intelligence Pulse</div>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-teal-700 dark:text-teal-400 font-bold border-r-4 border-teal-500 bg-teal-50/50 dark:bg-teal-900/20 transition-all" href="/dashboard">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-300 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors duration-200" href="/scrum-report">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+<span>Active Sprint</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-300 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors duration-200" href="/history">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span>Team Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-300 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors duration-200" href="/trello-auth">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span>AI Configuration</span>
+</a>
+</nav>
+<div class="px-6 mt-auto space-y-4">
+<button class="w-full pulse-gradient text-white py-3 rounded-lg font-bold text-sm shadow-md flex items-center justify-center gap-2 active:opacity-80 transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                New Sprint
+            </button>
+<div class="pt-6 border-t border-slate-200 dark:border-slate-800">
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 transition-colors" href="/profile">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="text-sm">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 dark:text-slate-400 hover:text-teal-600 transition-colors" href="/">
+<span class="material-symbols-outlined" data-icon="info">info</span>
+<span class="text-sm">About Us</span>
+</a>
+<div class="flex items-center gap-3 px-4 py-3 mt-4 border-t border-slate-200 dark:border-slate-800">
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border-2 border-primary/20 p-0.5 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYapo2OZd_RkFWyVUON1zfJo6JNXTykyFMIkBcM0iD3GBUNeawmfJTCGyQzT-mHYU7yJPM5JNC1n1ZklKqI38yAiiLjaqs_4eFXolB-stDG5_FDle3YmNszglagzmHH6zOu2arocZVZD9lOOibJFwMidpnK4P3jA07KfUuRms3Bq_vbC8W0X0tL_7OSqPcfhpCu5Ys0derN4GB1Fs8CTGnNFE-o2yqFN4N4t_it4sXKk8ylg-BaFXKAV80s3Ss_TlfUCEQSrctUA"/>
+<div class="flex flex-col">
+<span class="text-sm font-bold text-on-surface">Alex Rivera</span>
+<span class="text-[10px] text-slate-500 uppercase tracking-tighter font-medium">Scrum Master</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary cursor-pointer ml-auto text-xl" data-icon="notifications">notifications</span>
+</div></div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-40 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl flex justify-between items-center w-full px-8 py-3 shadow-sm dark:shadow-none font-['Inter'] font-medium">
+<div class="flex items-center gap-8">
+<nav class="flex gap-6">
+<a class="text-teal-600 dark:text-teal-400 border-b-2 border-teal-500 pb-1" href="/dashboard">Meetings</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-teal-500 transition-all" href="/scrum-report">Reports</a><a class="text-slate-500 dark:text-slate-400 hover:text-teal-500 transition-all" href="/history">History</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<button class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-primary/20 transition-all">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    Live Pulse
+                </button>
+</div>
+</header>
+<!-- Main Workspace -->
+<div class="p-8 space-y-8 max-w-7xl mx-auto">
+<!-- Top Section: Horizontal Split -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Share Meeting Tab Card -->
+<div class="bg-surface-container-lowest rounded-xl p-8 flex flex-col justify-between items-start border-l-4 border-primary shadow-sm">
+<div>
+<h2 class="text-2xl font-headline font-bold tracking-tight mb-2">Share Meeting Tab</h2>
+<p class="text-on-surface-variant text-sm mb-8 leading-relaxed max-w-md">Connect your meeting window to ScrumAI. Our neural processor will extract tasks and updates in real-time while you speak.</p>
+</div>
+<div class="w-full flex items-center justify-between">
+<button class="pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="screen_share">screen_share</span>
+                            Share Screen / Tab
+                        </button>
+<div class="flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span class="text-xs font-bold font-label uppercase tracking-wider">Sharing Inactive</span>
+</div>
+</div>
+</div>
+<!-- Scrum Setup Card -->
+<div class="bg-surface-container-low rounded-xl p-8 flex flex-col justify-between border-l-4 border-tertiary shadow-sm">
+<div>
+<h2 class="text-2xl font-headline font-bold tracking-tight mb-2">Scrum Setup</h2>
+<p class="text-on-surface-variant text-sm mb-8 leading-relaxed max-w-md">Initialize a new session or pick up where you left off. The AI will sync with your existing backlog automatically.</p>
+</div>
+<div class="flex gap-4">
+<button class="bg-surface-container-lowest text-primary border border-primary/20 px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-primary/5 transition-all">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+                            Create New Scrum
+                        </button>
+<button class="text-on-surface-variant px-4 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-surface-container-high transition-all">
+<span class="material-symbols-outlined" data-icon="folder_open">folder_open</span>
+                            Load Existing
+                        </button>
+</div>
+</div>
+</div>
+<!-- Middle Section: Dynamic Scrum Board -->
+<section class="space-y-6">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="text-xl font-headline font-bold">Dynamic Scrum Board</h3>
+<p class="text-sm text-on-surface-variant">Live view of current sprint velocity and task movement.</p>
+</div>
+<button class="flex items-center gap-2 text-primary font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-all">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+                        Add Task
+                    </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- To Do Column -->
+<div class="space-y-4">
+<div class="flex items-center justify-between px-2">
+<h4 class="text-xs font-label font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                                To Do (3)
+                            </h4>
+</div>
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer">
+<div class="flex justify-between mb-3">
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">Task</span>
+<span class="text-[10px] text-on-surface-variant font-bold">SP: 5</span>
+</div>
+<p class="text-sm font-semibold mb-4 leading-snug">Implement GraphQL schema for user analytics dashboard</p>
+<div class="flex justify-between items-center">
+<div class="flex -space-x-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full border-2 border-surface-container-lowest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfxSCeJhvesBd3-gDL0BquYEQzkeq1e7SQKj_jDLzFSuBoMrMyCGgfBsM0RxCFrZx8AShbZNbdarDYsoYo_fXnSZXV_QDvsYqpnTbU34olwgdlRDb3uDkuGByfwngziz4oD4cSuSibQBNEQQuOsCTFK4BzRccEuxjNg6nm-PUegsGr64FMluxffzYlikIETlGv4o_j5AEtimE5UToe9NC7cMqIKHSXaQlY7urxPZRjyz_gOnkaMokzBiPwQFcsyWtHjY0UdRX2tQ"/>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="more_horiz">more_horiz</span>
+</div>
+</div>
+<!-- Card 2 (Blocker) -->
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border-2 border-error/20 bg-error/5 cursor-pointer">
+<div class="flex justify-between mb-3">
+<span class="px-2 py-0.5 bg-error-container text-on-error-container text-[10px] font-bold rounded uppercase">Blocker</span>
+<span class="material-symbols-outlined text-error text-xs" data-icon="priority_high">priority_high</span>
+</div>
+<p class="text-sm font-semibold mb-4 leading-snug">API Key rotation required for AWS production environment</p>
+<div class="flex justify-between items-center">
+<div class="flex -space-x-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full border-2 border-surface-container-lowest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgJI6ctsBk1Jkt0F_Twg6YOZb6g2XqN_Dv2Igob9oc462HZD681K4HXx7_KPSVoerw5updamicIotA8zDKDB1czYd32_Xp9qTJr_66j7CabbFyDIuRgKVEPjb5Qh6-uafzgXPR32NHy28ssc2T9SZWtXFqfyExyzKlWk_3O38Udo_pIioDCkFB2Fw4hUrNo3Q7sPWQtt-O-C3wWWCD0AxVOfpF2SEPP_l20dh2vaZ6z6ov938xpadRQHPntdqHMCPR_i12n1wISw"/>
+</div>
+<span class="text-[10px] text-error font-bold italic">Awaiting Lead</span>
+</div>
+</div>
+</div>
+</div>
+<!-- In Progress Column -->
+<div class="space-y-4">
+<div class="flex items-center justify-between px-2">
+<h4 class="text-xs font-label font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+                                In Progress (1)
+                            </h4>
+</div>
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4">
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-md border-l-4 border-tertiary-container glow-pulse cursor-pointer">
+<div class="flex justify-between mb-3">
+<span class="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded uppercase">Update</span>
+<span class="material-symbols-outlined text-tertiary text-xs animate-spin" data-icon="settings_slow_motion">settings_slow_motion</span>
+</div>
+<p class="text-sm font-semibold mb-4 leading-snug">Refactoring auth middleware for session persistence</p>
+<div class="flex justify-between items-center">
+<div class="flex -space-x-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full border-2 border-surface-container-lowest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqTwae-2czrVRiTwNHbeQ7tkifm9GzWPKiMw5JvRkb03d8dixB8zi04Uq3MIu3jF-ZenCpekemcSmQS6x01o1elAudAj_a1xWPIWBluZncain1trvH_orGwHuCQbquF8qM832Q-7ECcAwQhIs4E1WG5u51mIRC0OV7Wb5pYweSP4DmX82Y4xTc2mrtLa16yGOje5FC_XuGKpiDeTkVviPx6vx3TPIiyH-Z3vK-5xFDG2Ke3xXu8dtbaM0M_rgZl6MIsWPPokTq9Q"/>
+<img alt="Avatar" class="w-6 h-6 rounded-full border-2 border-surface-container-lowest bg-tertiary-fixed" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCiX7bE-TwRceF3b6CCkKV3MXFLZ1wtUdz3EsyCqOuzybekglncDBqiO6drecMmb37TbvxU1_0nRRW6WoN1KT48Jz4Hi0QOaRyKtFUaZ5BfqCS73nk5jBvGDZzXiNOAPSCZthkXOurRf8YMX8VuSgOnZ_BjbpL7EJO6jQG7sSPjZFsa0hG6QG-5MCKQlxuySWPgCKhzV2oKaQq1DOZh9fuL3uWbhoyeaiFHm_PJ9w36Xh-AE3CVCjmngzs8_PzGEohlKhECADwlSA"/>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[10px]" data-icon="psychology">psychology</span>
+<span class="text-[10px] text-tertiary font-bold">AI Pairing</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Completed Column -->
+<div class="space-y-4">
+<div class="flex items-center justify-between px-2">
+<h4 class="text-xs font-label font-bold text-on-surface-variant uppercase tracking-widest flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                                Completed (12)
+                            </h4>
+</div>
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4 opacity-75 grayscale-[0.2]">
+<div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border border-transparent cursor-pointer">
+<div class="flex justify-between mb-3">
+<span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">Task</span>
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="text-sm font-semibold mb-4 leading-snug text-on-surface-variant/80">UI Design System Foundation: Color Tokens</p>
+<div class="flex justify-between items-center">
+<div class="flex -space-x-2">
+<img alt="Avatar" class="w-6 h-6 rounded-full border-2 border-surface-container-lowest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzFJ7FgtcjjgJuZJ_UV96EU9tcfCrxGvLq24yHhc2nV4NPAelw4RfMHvb_SkKWxJYDNoM5YpxwucrNaMCq9VGc2hori3m57C6TtX4tfBavcdc1xaCFV4UX3vfACW9thmGkaGL_834Iilr0FqvVwui7kEe89KUh8c_9iD_3JcAZJX31QHFTm9Uy_kzyX1mvmeb7WTXr9hG-Z826asjjfghJ2LEqLwZJqWmFJIIJ93jQze_wxuW-O6AefqBENzVzmLcfyL62t_VxAA"/>
+</div>
+<span class="text-[10px] text-on-surface-variant">Closed 2h ago</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Section -->
+<div class="flex flex-col items-center justify-center pt-8 pb-12 border-t border-surface-container-highest">
+<button id="end-meeting-btn" class="bg-on-surface text-surface-container-lowest px-12 py-4 rounded-full font-headline font-bold text-lg flex items-center gap-3 shadow-xl hover:bg-primary transition-all group" onclick="endMeeting()">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="auto_fix">auto_fix</span>
+                    End Meeting &amp; Analyze
+                </button>
+<p class="mt-4 text-sm text-on-surface-variant font-medium">Click to generate AI summary, update backlog, and email minutes.</p>
+</div>
+</div>
+
+<script>
+  // Read session_id from URL param or localStorage
+  function getSessionId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('session') || localStorage.getItem('scrumai_session_id');
+  }
+
+  async function startMeeting() {
+    try {
+      const res = await fetch('/meeting/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_name: 'Live Meeting' })
+      });
+      const data = await res.json();
+      localStorage.setItem('scrumai_session_id', data.session_id);
+      console.log('Meeting started:', data.session_id);
+    } catch (e) {
+      console.error('Failed to start meeting:', e);
+    }
+  }
+
+  async function endMeeting() {
+    const sessionId = getSessionId();
+    if (!sessionId) {
+      alert('No active session. Please start a meeting first.');
+      return;
+    }
+    const btn = document.getElementById('end-meeting-btn');
+    btn.disabled = true;
+    btn.textContent = 'Analyzing…';
+    try {
+      const res = await fetch('/meeting/end', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_id: sessionId, generate_report: true })
+      });
+      const data = await res.json();
+      localStorage.removeItem('scrumai_session_id');
+      window.location.href = '/scrum-report';
+    } catch (e) {
+      console.error('Failed to end meeting:', e);
+      btn.disabled = false;
+      btn.textContent = 'End Meeting & Analyze';
+    }
+  }
+
+  // Connect WebSocket for live updates if a session is active
+  const sessionId = getSessionId();
+  if (sessionId) {
+    const ws = new WebSocket(`ws://${location.host}/ws/${sessionId}`);
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      console.log('Live update:', msg);
+    };
+  }
+</script>
+<!-- Intelligence Rail (Right-aligned AI suggestions as per design system) -->
+<div class="fixed right-0 top-1/4 h-1/2 w-1.5 bg-tertiary-container/30 rounded-l-full cursor-pointer hover:w-64 group transition-all duration-300 z-30 overflow-hidden flex flex-col glass-card border-l border-primary/10">
+<div class="opacity-0 group-hover:opacity-100 p-6 flex flex-col h-full">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
+<h5 class="font-headline font-bold text-sm uppercase tracking-tighter">Live Insights</h5>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-surface-container-high/50 rounded-lg border border-primary/5">
+<p class="text-xs font-bold mb-1">Velocity Warning</p>
+<p class="text-[10px] leading-tight text-on-surface-variant">Current pace is 15% lower than sprint average. Suggest splitting Task #42.</p>
+</div>
+<div class="p-3 bg-surface-container-high/50 rounded-lg border border-primary/5">
+<p class="text-xs font-bold mb-1">Speaker Sentiment</p>
+<p class="text-[10px] leading-tight text-on-surface-variant">Consensus reached on 'Refactoring'. 92% confidence score.</p>
+</div>
+</div>
+<div class="mt-auto pt-4 flex justify-center">
+<span class="material-symbols-outlined text-slate-300" data-icon="keyboard_double_arrow_right">keyboard_double_arrow_right</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

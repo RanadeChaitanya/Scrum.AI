@@ -1,9 +1,12 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, UploadFile, File, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import uuid
 from datetime import datetime
+from pathlib import Path
 
 from configs.settings import settings
 from core import redis_client
@@ -25,6 +28,19 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# ---------------------------------------------------------------------------
+# Static file serving
+# ---------------------------------------------------------------------------
+# Resolve paths relative to this file so the server works regardless of the
+# working directory it is launched from.
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR / "frontend"
+PAGES_DIR    = FRONTEND_DIR / "pages"
+ASSETS_DIR   = FRONTEND_DIR / "assets"
+
+# Serve /assets/* (screenshots, design-system docs, etc.)
+app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 
 
 class MeetingStartRequest(BaseModel):
@@ -58,7 +74,101 @@ async def shutdown():
     await trello_service.close()
 
 
-@app.get("/")
+# ---------------------------------------------------------------------------
+# Page helper
+# ---------------------------------------------------------------------------
+def _read_page(filename: str) -> str:
+    """Read an HTML page from the pages directory."""
+    page_path = PAGES_DIR / filename
+    if not page_path.exists():
+        raise HTTPException(status_code=404, detail=f"Page '{filename}' not found")
+    return page_path.read_text(encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Frontend page routes
+# ---------------------------------------------------------------------------
+@app.get("/", response_class=HTMLResponse)
+async def serve_landing():
+    """Landing page — entry point of the application."""
+    return _read_page("landing.html")
+
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def serve_dashboard():
+    """Main dashboard with the live Kanban board."""
+    return _read_page("dashboard.html")
+
+
+@app.get("/history", response_class=HTMLResponse)
+async def serve_history():
+    """Report history and download page."""
+    return _read_page("history.html")
+
+
+@app.get("/profile", response_class=HTMLResponse)
+async def serve_profile():
+    """User profile and settings page."""
+    return _read_page("profile.html")
+
+
+@app.get("/scrum-report", response_class=HTMLResponse)
+async def serve_scrum_report():
+    """Final sprint report page."""
+    return _read_page("scrum-report.html")
+
+
+@app.get("/trello-auth", response_class=HTMLResponse)
+async def serve_trello_auth():
+    """Trello OAuth connection page."""
+    return _read_page("trello-auth.html")
+
+
+# ---------------------------------------------------------------------------
+# Trello OAuth flow
+# ---------------------------------------------------------------------------
+@app.get("/trello/connect")
+async def trello_connect():
+    """
+    Redirect the browser to Trello's OAuth authorisation page.
+    The user lands here after clicking 'Log in with Trello' on /trello-auth.
+    """
+    if not settings.trello_api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Trello API key not configured. Set TRELLO_API_KEY in .env"
+        )
+    callback_url = "http://localhost:8000/trello/callback"
+    trello_auth_url = (
+        f"https://trello.com/1/authorize"
+        f"?expiration=never"
+        f"&name=ScrumAI"
+        f"&scope=read,write"
+        f"&response_type=token"
+        f"&key={settings.trello_api_key}"
+        f"&return_url={callback_url}"
+    )
+    return RedirectResponse(url=trello_auth_url)
+
+
+@app.get("/trello/callback")
+async def trello_callback(token: Optional[str] = None, request: Request = None):
+    """
+    Trello redirects back here with the OAuth token as a query parameter.
+    In production this token should be stored server-side (e.g. in Redis or a DB).
+    For now we redirect to the dashboard with a success flag.
+    """
+    if not token:
+        return RedirectResponse(url="/trello-auth?error=no_token")
+    # Store token in Redis so the session can use it
+    await redis_client.set_session_state("trello", "token", {"token": token})
+    return RedirectResponse(url="/dashboard?trello=connected")
+
+
+# ---------------------------------------------------------------------------
+# Health / API info
+# ---------------------------------------------------------------------------
+@app.get("/api")
 async def root():
     return {"message": "AI Scrum Automation System API", "version": "1.0.0"}
 

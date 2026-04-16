@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ScrumAI - Automate Your Scrum with Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary-fixed-dim": "#89ceff",
+                    "tertiary-container": "#27aef3",
+                    "surface-variant": "#e0e3e5",
+                    "surface-container-high": "#e6e8ea",
+                    "surface": "#f7f9fb",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#006591",
+                    "error": "#ba1a1a",
+                    "surface-tint": "#006b5f",
+                    "primary-container": "#14b8a6",
+                    "on-surface-variant": "#3c4947",
+                    "primary-fixed-dim": "#4fdbc8",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#191c1e",
+                    "surface-container-highest": "#e0e3e5",
+                    "secondary-fixed": "#6ffbbe",
+                    "outline": "#6c7a77",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-secondary-container": "#00714d",
+                    "background": "#f7f9fb",
+                    "secondary": "#006c49",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-background": "#191c1e",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#001e2f",
+                    "on-tertiary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#d8dadc",
+                    "on-primary-fixed-variant": "#005048",
+                    "on-tertiary-fixed-variant": "#004c6e",
+                    "on-primary-container": "#00423b",
+                    "on-secondary-fixed-variant": "#005236",
+                    "inverse-primary": "#4fdbc8",
+                    "outline-variant": "#bbcac6",
+                    "inverse-surface": "#2d3133",
+                    "on-secondary-fixed": "#002113",
+                    "surface-container-low": "#f2f4f6",
+                    "secondary-container": "#6cf8bb",
+                    "tertiary-fixed": "#c9e6ff",
+                    "primary-fixed": "#71f8e4",
+                    "on-primary-fixed": "#00201c",
+                    "on-error": "#ffffff",
+                    "on-tertiary-container": "#003e5c",
+                    "primary": "#006b5f",
+                    "surface-container": "#eceef0",
+                    "surface-bright": "#f7f9fb",
+                    "surface-container-lowest": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Space Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; color: #191c1e; }
+        .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .pulse-gradient { background: linear-gradient(135deg, #006b5f 0%, #14b8a6 100%); }
+        .glass-nav { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .h-screen-fixed { height: 100vh; max-height: 100vh; overflow: hidden; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container h-screen-fixed flex flex-col">
+<!-- TopNavBar -->
+<nav class="shrink-0 w-full z-50 bg-[#f7f9fb]/70 dark:bg-slate-900/70 glass-nav shadow-sm dark:shadow-none">
+<div class="flex justify-between items-center px-6 md:px-12 py-3 max-w-7xl mx-auto">
+<div class="text-2xl font-bold font-headline text-[#006b5f] dark:text-[#14B8A6] tracking-tight">ScrumAI</div>
+<div class="hidden md:flex items-center gap-8">
+<a class="font-headline text-sm font-medium tracking-tight text-[#006b5f] dark:text-[#14B8A6] border-b-2 border-[#14B8A6] pb-1" href="/#features">Features</a>
+<a class="font-headline text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-[#14B8A6] transition-colors duration-200" href="/#solutions">Solutions</a>
+<a class="font-headline text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-[#14B8A6] transition-colors duration-200" href="/#pricing">Pricing</a>
+<a class="font-headline text-sm font-medium tracking-tight text-slate-600 dark:text-slate-400 hover:text-[#14B8A6] transition-colors duration-200" href="/dashboard">AI Insights</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hidden md:block font-headline text-sm font-medium text-slate-600 hover:text-[#14B8A6] transition-colors" onclick="window.location.href='/trello-auth'">Login</button>
+<button class="pulse-gradient text-white px-5 py-2 rounded-lg font-headline text-sm font-bold active:scale-95 transition-transform" onclick="window.location.href='/dashboard'">Get Started</button>
+</div>
+</div>
+</nav>
+<main class="flex-grow flex items-center overflow-hidden">
+<!-- Hero Section -->
+<section class="relative px-6 md:px-12 w-full max-w-7xl mx-auto py-8 lg:py-12">
+<div class="grid md:grid-cols-2 gap-8 lg:gap-16 items-center">
+<div class="relative z-10 flex flex-col justify-center">
+<span class="inline-block self-start px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold font-label tracking-widest uppercase mb-4">
+                        Intelligent Workflow
+                    </span>
+<h1 class="text-4xl md:text-5xl lg:text-7xl font-headline font-bold text-on-surface leading-[1.1] mb-6 tracking-tighter">
+                        Automate Your Scrum with <span class="text-primary">Intelligence.</span>
+</h1>
+<p class="text-base md:text-lg text-outline mb-8 leading-relaxed max-w-lg">
+                        The first AI-powered platform that listens to your meetings, updates your boards, and generates deep insights in real-time.
+                    </p>
+<div class="flex flex-wrap gap-4 mb-8">
+<button class="pulse-gradient text-white px-8 py-3.5 rounded-xl font-headline font-bold text-base shadow-lg hover:shadow-primary/20 transition-all" onclick="window.location.href='/dashboard'">Get Started for Free</button>
+</div>
+<!-- Condensed Preview Chips -->
+<div class="flex flex-wrap gap-3 mt-4 border-t border-outline-variant/20 pt-6">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-full">
+<span class="material-symbols-outlined text-primary text-lg">hearing</span>
+<span class="text-xs font-semibold">Live Capture</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-full">
+<span class="material-symbols-outlined text-secondary text-lg">sync_alt</span>
+<span class="text-xs font-semibold">Dynamic Sync</span>
+</div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container rounded-full">
+<span class="material-symbols-outlined text-tertiary text-lg">insights</span>
+<span class="text-xs font-semibold">Predictive Risks</span>
+</div>
+</div>
+</div>
+<div class="relative flex justify-center items-center">
+<div class="absolute -top-10 -right-10 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+<div class="absolute -bottom-10 -left-10 w-80 h-80 bg-tertiary-container/10 rounded-full blur-3xl"></div>
+<div class="relative w-full max-w-[580px] bg-surface-container-lowest p-3 rounded-2xl shadow-2xl shadow-on-surface/5 border border-outline-variant/10 transform hover:scale-[1.02] transition-transform duration-500">
+<img alt="ScrumAI Dashboard Preview" class="w-full h-auto rounded-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjjLqL9LWvZmuQj_7wkOs61FIw_kvNSDh4_6CVJCaDsB4r19MIZvHAXHdKDtPBLhL-IjQ79l7ElOBlnr8gzFNTx4T_gPuneKSn2qJlmQ45-EttEHiVDzt-_lHy4YsyF15W0hwzR8xnIZtkluav19kO5SK_B0ahuNUtyeE1xbWT0aXOwcezD2V2fFMrCQzqakFo-nn-WEvXefQqjWBDZ5tsbtTwdXEQDXtJHsHSjeh6iHAD7TNET7cFo3oipfK3w27steD7yX2dTw"/>
+<!-- Floating Intelligence Rail Component -->
+<div class="absolute -bottom-6 -left-6 md:-left-12 bg-white/90 backdrop-blur-md p-4 rounded-xl shadow-xl border border-outline-variant/20 max-w-[240px] hidden sm:block">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="text-[10px] font-bold text-primary tracking-widest uppercase">Intelligence Rail</span>
+</div>
+<p class="text-[11px] font-medium text-on-surface">Suggesting +2 points for Task #422 based on past sprint velocity.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer (Fixed at bottom) -->
+<footer class="shrink-0 bg-[#f2f4f6] dark:bg-slate-950 w-full border-t border-slate-200 dark:border-slate-800">
+<div class="flex flex-row justify-between items-center py-4 px-8 max-w-7xl mx-auto gap-6">
+<div class="flex items-center gap-6">
+<div class="text-lg font-bold font-headline text-[#006b5f] dark:text-[#14B8A6]">ScrumAI</div>
+<p class="font-body text-[11px] text-slate-500 dark:text-slate-400">© 2024 ScrumAI Intelligence Corp.</p>
+</div>
+<div class="hidden md:flex gap-6">
+<a class="font-body text-[11px] text-slate-500 hover:text-[#14B8A6] transition-all" href="#">Privacy</a>
+<a class="font-body text-[11px] text-slate-500 hover:text-[#14B8A6] transition-all" href="#">Terms</a>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-slate-600 hover:text-primary cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-base">share</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-slate-600 hover:text-primary cursor-pointer transition-colors">
+<span class="material-symbols-outlined text-base">public</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>
