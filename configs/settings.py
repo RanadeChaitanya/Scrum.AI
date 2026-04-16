@@ -48,6 +48,14 @@ class Settings(BaseSettings):
     trello_token: Optional[str] = None
     trello_board_id: Optional[str] = None
 
+    # Base URL used for OAuth callbacks — must exactly match the
+    # "Allowed Origins" / "Redirect URL" registered in the Trello Developer Console.
+    # https://trello.com/app-key  →  "Allowed Origins" field
+    app_base_url: str = "http://localhost:8000"
+
+    # Fallback URL — where to redirect on any auth failure
+    trello_fallback_url: str = "/auth/error"
+
     # WebSocket
     ws_host: str = "0.0.0.0"
     ws_port: int = 8765

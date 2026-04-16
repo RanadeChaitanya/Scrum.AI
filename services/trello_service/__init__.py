@@ -9,11 +9,22 @@ from configs.settings import settings
 
 class TrelloService:
     def __init__(self):
-        self.api_key = settings.trello_api_key
-        self.token = settings.trello_token
-        self.board_id = settings.trello_board_id
         self.base_url = "https://api.trello.com/1"
         self._session: Optional[aiohttp.ClientSession] = None
+
+    # Read credentials lazily from settings so .env changes are picked up
+    # without restarting the server.
+    @property
+    def api_key(self) -> Optional[str]:
+        return settings.trello_api_key
+
+    @property
+    def token(self) -> Optional[str]:
+        return settings.trello_token
+
+    @property
+    def board_id(self) -> Optional[str]:
+        return settings.trello_board_id
     
     async def _get_session(self) -> aiohttp.ClientSession:
         if self._session is None or self._session.closed:

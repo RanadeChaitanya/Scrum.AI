@@ -98,7 +98,110 @@
     </style>
 </head>
 <body class="bg-background text-on-background font-body min-h-screen overflow-x-hidden">
-<!-- Notification Toast -->
+<!-- Share Screen Modal -->
+<div id="share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <!-- Modal Header -->
+    <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+            <span class="material-symbols-outlined text-teal-600" style="font-variation-settings:'FILL' 1;">screen_share</span>
+          </div>
+          <div>
+            <h2 class="font-headline font-bold text-gray-900 text-lg">Share your screen</h2>
+            <p class="text-xs text-gray-400">ScrumAI will capture and analyze your meeting</p>
+          </div>
+        </div>
+        <button onclick="closeShareModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Share Options -->
+    <div class="px-6 py-5 space-y-3">
+      <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Select what to share</p>
+
+      <!-- Browser Tab (preferred) -->
+      <button onclick="startShare('browser')"
+              class="share-option w-full flex items-center gap-4 p-4 rounded-xl border-2 border-teal-500 bg-teal-50 hover:bg-teal-100 transition-all group">
+        <div class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-teal-600" style="font-variation-settings:'FILL' 1;">tab</span>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-gray-800 text-sm">Browser Tab</p>
+          <p class="text-xs text-gray-500">Share a specific tab — best for meeting apps</p>
+        </div>
+        <span class="ml-auto text-[10px] font-bold bg-teal-500 text-white px-2 py-0.5 rounded-full">Recommended</span>
+      </button>
+
+      <!-- Application Window -->
+      <button onclick="startShare('window')"
+              class="share-option w-full flex items-center gap-4 p-4 rounded-xl border-2 border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all">
+        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-gray-600" style="font-variation-settings:'FILL' 1;">web_asset</span>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-gray-800 text-sm">Application Window</p>
+          <p class="text-xs text-gray-500">Share a specific app window</p>
+        </div>
+      </button>
+
+      <!-- Entire Screen -->
+      <button onclick="startShare('monitor')"
+              class="share-option w-full flex items-center gap-4 p-4 rounded-xl border-2 border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all">
+        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-gray-600" style="font-variation-settings:'FILL' 1;">desktop_windows</span>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-gray-800 text-sm">Entire Screen</p>
+          <p class="text-xs text-gray-500">Share your full display</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- Error state -->
+    <div id="share-error" class="hidden mx-6 mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+      <span class="material-symbols-outlined text-red-500 text-sm mt-0.5">error</span>
+      <p id="share-error-msg" class="text-xs text-red-600"></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 pb-6 flex gap-3">
+      <button onclick="joinWithoutSharing()"
+              class="flex-1 py-3 rounded-xl border border-gray-200 text-gray-500 text-sm font-medium hover:bg-gray-50 transition-all">
+        Join without sharing
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen Share Preview Bar (shown while sharing) -->
+<div id="share-bar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4 min-w-[340px]">
+  <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+  <div class="flex-1">
+    <p class="text-sm font-bold">Sharing your screen</p>
+    <p id="share-bar-label" class="text-xs text-gray-400">ScrumAI is capturing your meeting</p>
+  </div>
+  <!-- Inline video preview thumbnail -->
+  <video id="share-preview" autoplay muted playsinline
+         class="w-20 h-12 rounded-lg object-cover border border-white/20 bg-black"></video>
+  <button onclick="stopSharing()"
+          class="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">
+    <span class="material-symbols-outlined text-sm">stop_screen_share</span>
+    Stop
+  </button>
+</div>
+
+<!-- Full screen share view (hidden by default, shown on expand) -->
+<div id="share-fullview" class="hidden fixed inset-0 z-40 bg-black/90 flex items-center justify-center">
+  <video id="share-video-full" autoplay muted playsinline class="max-w-full max-h-full rounded-xl shadow-2xl"></video>
+  <button onclick="document.getElementById('share-fullview').classList.add('hidden')"
+          class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors">
+    <span class="material-symbols-outlined">close_fullscreen</span>
+  </button>
+</div>
 <!-- SideNavBar -->
 <aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 dark:bg-slate-900 border-r-0 flex flex-col py-6 font-['Space_Grotesk'] tracking-tight z-50">
 <div class="px-6 mb-10">
@@ -175,13 +278,15 @@
 <p class="text-on-surface-variant text-sm mb-8 leading-relaxed max-w-md">Connect your meeting window to ScrumAI. Our neural processor will extract tasks and updates in real-time while you speak.</p>
 </div>
 <div class="w-full flex items-center justify-between">
-<button class="pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all">
+<button id="share-btn"
+        onclick="openShareModal()"
+        class="pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all">
 <span class="material-symbols-outlined" data-icon="screen_share">screen_share</span>
                             Share Screen / Tab
                         </button>
-<div class="flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full">
-<span class="w-2 h-2 rounded-full bg-error"></span>
-<span class="text-xs font-bold font-label uppercase tracking-wider">Sharing Inactive</span>
+<div id="share-status" class="flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full">
+<span id="share-status-dot" class="w-2 h-2 rounded-full bg-error"></span>
+<span id="share-status-text" class="text-xs font-bold font-label uppercase tracking-wider">Sharing Inactive</span>
 </div>
 </div>
 </div>
@@ -320,7 +425,7 @@
 </div>
 
 <script>
-  // Read session_id from URL param or localStorage
+  // ─── Session helpers ────────────────────────────────────────────────────────
   function getSessionId() {
     const params = new URLSearchParams(window.location.search);
     return params.get('session') || localStorage.getItem('scrumai_session_id');
@@ -335,44 +440,201 @@
       });
       const data = await res.json();
       localStorage.setItem('scrumai_session_id', data.session_id);
-      console.log('Meeting started:', data.session_id);
+      console.log('[meeting] Started:', data.session_id);
     } catch (e) {
-      console.error('Failed to start meeting:', e);
+      console.error('[meeting] Failed to start:', e);
     }
   }
 
   async function endMeeting() {
     const sessionId = getSessionId();
-    if (!sessionId) {
-      alert('No active session. Please start a meeting first.');
-      return;
-    }
+    if (!sessionId) { alert('No active session. Please start a meeting first.'); return; }
     const btn = document.getElementById('end-meeting-btn');
     btn.disabled = true;
     btn.textContent = 'Analyzing…';
     try {
-      const res = await fetch('/meeting/end', {
+      await fetch('/meeting/end', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, generate_report: true })
       });
-      const data = await res.json();
       localStorage.removeItem('scrumai_session_id');
+      stopSharing();
       window.location.href = '/scrum-report';
     } catch (e) {
-      console.error('Failed to end meeting:', e);
+      console.error('[meeting] Failed to end:', e);
       btn.disabled = false;
-      btn.textContent = 'End Meeting & Analyze';
+      btn.innerHTML = '<span class="material-symbols-outlined group-hover:scale-110 transition-transform">auto_fix</span> End Meeting &amp; Analyze';
     }
   }
 
-  // Connect WebSocket for live updates if a session is active
+  // ─── Screen Share State ──────────────────────────────────────────────────────
+  let _stream = null;          // active MediaStream
+  let _shareType = null;       // 'browser' | 'window' | 'monitor'
+
+  // ─── Modal controls ──────────────────────────────────────────────────────────
+  function openShareModal() {
+    // Check browser support first
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      showShareError('Screen sharing is not supported in this browser. Please use Chrome, Edge, or Firefox.');
+      return;
+    }
+    document.getElementById('share-modal').classList.remove('hidden');
+    document.getElementById('share-error').classList.add('hidden');
+  }
+
+  function closeShareModal() {
+    document.getElementById('share-modal').classList.add('hidden');
+    document.getElementById('share-error').classList.add('hidden');
+  }
+
+  function showShareError(msg) {
+    const el = document.getElementById('share-error');
+    document.getElementById('share-error-msg').textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  // ─── Start sharing ────────────────────────────────────────────────────────────
+  async function startShare(surfaceType) {
+    // surfaceType: 'browser' | 'window' | 'monitor'
+    const constraints = {
+      video: {
+        displaySurface: surfaceType,   // hint to browser — user can still override
+        frameRate: { ideal: 15, max: 30 },
+        width:  { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100,
+      }
+    };
+
+    try {
+      _stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+      _shareType = surfaceType;
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        showShareError('Permission denied. Please allow screen sharing when prompted.');
+      } else if (err.name === 'NotFoundError') {
+        showShareError('No screen source found. Please try a different option.');
+      } else if (err.name === 'AbortError') {
+        // User cancelled the picker — treat as "join without sharing"
+        closeShareModal();
+        joinWithoutSharing();
+        return;
+      } else {
+        showShareError(`Screen sharing failed: ${err.message}`);
+      }
+      return;
+    }
+
+    // Attach stream to preview elements
+    const previewEl = document.getElementById('share-preview');
+    const fullEl    = document.getElementById('share-video-full');
+    previewEl.srcObject = _stream;
+    fullEl.srcObject    = _stream;
+
+    // Listen for user stopping share via browser's built-in "Stop sharing" button
+    _stream.getVideoTracks()[0].addEventListener('ended', () => {
+      stopSharing();
+    });
+
+    // Update UI
+    closeShareModal();
+    _setShareActive(true, surfaceType);
+
+    // Start meeting session if not already started
+    if (!getSessionId()) {
+      await startMeeting();
+    }
+
+    console.log('[screenshare] Started:', surfaceType, _stream.getTracks());
+  }
+
+  // ─── Stop sharing ─────────────────────────────────────────────────────────────
+  function stopSharing() {
+    if (_stream) {
+      _stream.getTracks().forEach(track => track.stop());
+      _stream = null;
+    }
+    const previewEl = document.getElementById('share-preview');
+    const fullEl    = document.getElementById('share-video-full');
+    if (previewEl) previewEl.srcObject = null;
+    if (fullEl)    fullEl.srcObject    = null;
+
+    _setShareActive(false);
+    console.log('[screenshare] Stopped');
+  }
+
+  // ─── Join without sharing ─────────────────────────────────────────────────────
+  async function joinWithoutSharing() {
+    closeShareModal();
+    if (!getSessionId()) {
+      await startMeeting();
+    }
+    console.log('[meeting] Joined without screen share');
+  }
+
+  // ─── UI state helper ──────────────────────────────────────────────────────────
+  function _setShareActive(active, surfaceType) {
+    const bar        = document.getElementById('share-bar');
+    const statusEl   = document.getElementById('share-status');
+    const statusDot  = document.getElementById('share-status-dot');
+    const statusText = document.getElementById('share-status-text');
+    const shareBtn   = document.getElementById('share-btn');
+    const barLabel   = document.getElementById('share-bar-label');
+
+    const labels = {
+      browser: 'Sharing browser tab',
+      window:  'Sharing application window',
+      monitor: 'Sharing entire screen',
+    };
+
+    if (active) {
+      // Show share bar
+      bar.classList.remove('hidden');
+      barLabel.textContent = labels[surfaceType] || 'Sharing screen';
+
+      // Update status pill → green "Sharing Active"
+      statusEl.className = 'flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full';
+      statusDot.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
+      statusText.textContent = 'Sharing Active';
+
+      // Change button to "Stop Sharing"
+      shareBtn.innerHTML = `
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">stop_screen_share</span>
+        Stop Sharing
+      `;
+      shareBtn.onclick = stopSharing;
+      shareBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-all';
+    } else {
+      // Hide share bar
+      bar.classList.add('hidden');
+
+      // Reset status pill → red "Sharing Inactive"
+      statusEl.className = 'flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full';
+      statusDot.className = 'w-2 h-2 rounded-full bg-error';
+      statusText.textContent = 'Sharing Inactive';
+
+      // Reset button
+      shareBtn.innerHTML = `
+        <span class="material-symbols-outlined">screen_share</span>
+        Share Screen / Tab
+      `;
+      shareBtn.onclick = openShareModal;
+      shareBtn.className = 'pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all';
+    }
+  }
+
+  // ─── WebSocket for live updates ───────────────────────────────────────────────
   const sessionId = getSessionId();
   if (sessionId) {
     const ws = new WebSocket(`ws://${location.host}/ws/${sessionId}`);
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
-      console.log('Live update:', msg);
+      console.log('[ws] Live update:', msg);
     };
   }
 </script>

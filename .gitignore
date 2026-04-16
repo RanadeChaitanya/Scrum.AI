@@ -2,6 +2,7 @@
 .env
 __pycache__/
 *.py[cod]
+*.pyc
 *.pyo
 *.pyd
 .Python
@@ -39,3 +40,6 @@ logs/
 
 # Redis dump
 dump.rdb
+
+# JSON session fallback store (used when Redis is unavailable — contains tokens)
+core/.session_store.json
