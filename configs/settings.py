@@ -17,10 +17,13 @@ class Settings(BaseSettings):
     redis_password: Optional[str] = None
 
     # Redis Stream Keys
-    audio_event_stream: str = "audio:events"
-    video_event_stream: str = "video:events"
+    audio_event_stream: str  = "audio:events"
+    video_event_stream: str  = "video:events"
     fusion_event_stream: str = "fusion:events"
     live_updates_stream: str = "live:updates"
+
+    # Redis Pub/Sub channel — all worker outputs fan out here → WebSocket broadcaster
+    scrum_pubsub_channel: str = "scrum_updates"
 
     # Audio Service
     pyannote_model: str = "pyannote/speaker-diarization-3.1"

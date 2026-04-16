@@ -1,6 +1,12 @@
 from pydantic import BaseModel, Field
+from pydantic import ConfigDict
 from typing import Optional, List, Literal, Dict, Any
 from datetime import datetime
+
+
+def _now() -> datetime:
+    from datetime import timezone
+    return datetime.now(timezone.utc)
 
 
 class SpeakerSegment(BaseModel):
@@ -56,8 +62,11 @@ class ScrumUpdate(BaseModel):
 
 
 class MeetingSession(BaseModel):
+    # Serialize datetime fields as ISO strings so json.dumps() never fails
+    model_config = ConfigDict(json_encoders={datetime: lambda v: v.isoformat()})
+
     session_id: str
-    started_at: datetime = Field(default_factory=datetime.now)
+    started_at: datetime = Field(default_factory=_now)
     ended_at: Optional[datetime] = None
     fusion_events: List[FusionEvent] = []
     scrum_updates: List[ScrumUpdate] = []
@@ -65,6 +74,15 @@ class MeetingSession(BaseModel):
     tasks: List[Dict[str, Any]] = []
     decisions: List[str] = []
     blockers: List[str] = []
+
+    def model_dump(self, **kwargs) -> Dict[str, Any]:
+        """Override to ensure datetime fields are serialized as ISO strings."""
+        data = super().model_dump(**kwargs)
+        if isinstance(data.get("started_at"), datetime):
+            data["started_at"] = data["started_at"].isoformat()
+        if isinstance(data.get("ended_at"), datetime):
+            data["ended_at"] = data["ended_at"].isoformat()
+        return data
 
 
 class LiveUpdate(BaseModel):
@@ -75,9 +93,17 @@ class LiveUpdate(BaseModel):
 
 
 class TrelloCard(BaseModel):
+    model_config = ConfigDict(json_encoders={datetime: lambda v: v.isoformat()})
+
     name: str
     desc: Optional[str] = None
     idList: str
     idMembers: List[str] = []
     due: Optional[datetime] = None
     labels: List[str] = []
+
+    def model_dump(self, **kwargs) -> Dict[str, Any]:
+        data = super().model_dump(**kwargs)
+        if isinstance(data.get("due"), datetime):
+            data["due"] = data["due"].isoformat()
+        return data

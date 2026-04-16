@@ -5,6 +5,11 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
 import uuid
+import base64
+import json
+import numpy as np
+import io
+import wave
 from datetime import datetime
 from pathlib import Path
 
@@ -16,7 +21,18 @@ from services.vision_service import vision_service
 from services.fusion_service import fusion_engine
 from services.reasoning_service import qwen_service, deepseek_service
 from services.trello_service import trello_service
-from services.websocket_service import connection_manager
+from services.websocket_service import connection_manager, redis_broadcaster
+
+# Worker singletons — all AI inference runs here, never in request path
+from workers.audio_worker    import AudioWorker
+from workers.vision_worker   import VisionWorker
+from workers.reasoning_worker import ReasoningWorker
+from workers.report_worker   import ReportWorker
+
+audio_worker     = AudioWorker()
+vision_worker    = VisionWorker()
+reasoning_worker = ReasoningWorker()
+report_worker    = ReportWorker()
 
 
 app = FastAPI(title="AI Scrum Automation System", version="1.0.0")
@@ -61,19 +77,41 @@ class SaveTokenRequest(BaseModel):
     token: str
 
 
+class TestEventRequest(BaseModel):
+    meeting_id: str
+    event_type: str = "scrum_update"
+    content: str = "Test Scrum Update from debug endpoint"
+    priority: str = "medium"
+    source: str = "test_worker"
+
+
 @app.on_event("startup")
 async def startup():
     await redis_client.connect()
+    # Initialize service connections (no ML loaded here — workers handle that lazily)
     await audio_service.initialize()
     await vision_service.initialize()
     await fusion_engine.initialize()
     await qwen_service.initialize()
     await deepseek_service.initialize()
-    print("All services initialized")
+    # Start Redis→WebSocket broadcaster BEFORE workers so no events are dropped
+    await redis_broadcaster.start()
+    # Start all workers as background asyncio tasks
+    await audio_worker.start()
+    await vision_worker.start()
+    await reasoning_worker.start()
+    await report_worker.start()
+    print("All services, broadcaster, and workers initialized")
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    # Stop broadcaster and workers gracefully before disconnecting
+    await redis_broadcaster.stop()
+    await audio_worker.stop()
+    await vision_worker.stop()
+    await reasoning_worker.stop()
+    await report_worker.stop()
     await redis_client.disconnect()
     await trello_service.close()
 
@@ -120,6 +158,12 @@ async def serve_profile():
 async def serve_scrum_report():
     """Final sprint report page."""
     return _read_page("scrum-report.html")
+
+
+@app.get("/live-test", response_class=HTMLResponse)
+async def serve_live_test():
+    """End-to-end pipeline test page."""
+    return _read_page("live-test.html")
 
 
 @app.get("/trello-auth", response_class=HTMLResponse)
@@ -377,6 +421,62 @@ async def root():
     return {"message": "AI Scrum Automation System API", "version": "1.0.0"}
 
 
+# ---------------------------------------------------------------------------
+# Debug / test endpoints
+# ---------------------------------------------------------------------------
+
+@app.post("/debug/emit")
+async def debug_emit_event(req: TestEventRequest):
+    """
+    Inject a test event directly into the publish_scrum_event pipeline.
+    Use this to verify the full Worker→Redis→WebSocket→Frontend flow.
+
+    Example:
+      curl -X POST http://localhost:8000/debug/emit \\
+           -H 'Content-Type: application/json' \\
+           -d '{"meeting_id":"test-123","content":"Fix login bug","priority":"high"}'
+    """
+    from datetime import datetime, timezone
+    from utils.time import now_iso
+    event = {
+        "event_type": req.event_type,
+        "meeting_id": req.meeting_id,
+        "source":     req.source,
+        "timestamp":  now_iso(),
+        "content":    req.content,
+        "priority":   req.priority,
+        "data": {
+            "task":     req.content,
+            "status":   "todo",
+            "owner":    None,
+            "priority": req.priority,
+            "timestamp": datetime.now(timezone.utc).timestamp(),
+        },
+    }
+    await redis_client.publish_scrum_event(event)
+    clients = connection_manager.client_count()
+    print(f"[debug] Emitted test event meeting_id={req.meeting_id!r} "
+          f"content={req.content!r} ws_clients={clients}")
+    return {"ok": True, "event": event, "ws_clients": clients}
+
+
+@app.get("/debug/status")
+async def debug_status():
+    """Show current system state: Redis, broadcaster, connected clients."""
+    return {
+        "redis_ok":      redis_client._redis_ok,
+        "broadcaster":   "running" if redis_broadcaster._task and not redis_broadcaster._task.done() else "stopped",
+        "ws_clients":    connection_manager.client_count(),
+        "ws_sessions":   list(connection_manager.active_connections.keys()),
+        "workers": {
+            "audio":     "running" if audio_worker._task and not audio_worker._task.done() else "stopped",
+            "vision":    "running" if vision_worker._task and not vision_worker._task.done() else "stopped",
+            "reasoning": "running" if reasoning_worker._task and not reasoning_worker._task.done() else "stopped",
+            "report":    "running" if report_worker._task and not report_worker._task.done() else "stopped",
+        },
+    }
+
+
 @app.post("/meeting/start")
 async def start_meeting(request: MeetingStartRequest):
     session_id = str(uuid.uuid4())
@@ -399,19 +499,27 @@ async def start_meeting(request: MeetingStartRequest):
 
 @app.post("/meeting/end")
 async def end_meeting(request: MeetingEndRequest):
+    """
+    ROUTER ONLY — stops session services, enqueues report job if requested.
+    Returns immediately. DeepSeek runs in report_worker.
+    """
     await audio_service.stop_session(request.session_id)
     await vision_service.stop_session(request.session_id)
     await fusion_engine.stop_session(request.session_id)
     await qwen_service.stop_session(request.session_id)
-    
-    result = {"session_id": request.session_id, "status": "ended"}
-    
+
+    await redis_client.set_session_state(request.session_id, "status", {"status": "ended"})
+
     if request.generate_report:
-        report = await deepseek_service.refine_session(request.session_id)
-        await redis_client.set_session_state(request.session_id, "report", report.model_dump())
-        result["report"] = report.model_dump()
-    
-    return result
+        await report_worker.enqueue({"session_id": request.session_id})
+        return {
+            "session_id": request.session_id,
+            "status":     "ended",
+            "report":     "generating",
+            "message":    "Report is being generated. Listen on WebSocket for report_ready event.",
+        }
+
+    return {"session_id": request.session_id, "status": "ended"}
 
 
 @app.get("/meeting/{session_id}")
@@ -432,51 +540,55 @@ async def get_meeting(session_id: str):
 
 @app.post("/audio/process")
 async def process_audio(session_id: str, file: UploadFile = File(...)):
+    """
+    INGESTION ONLY — validates input, converts to float32, enqueues job.
+    Returns immediately with job_id. All AI runs in audio_worker.
+    """
     audio_bytes = await file.read()
-    
-    import numpy as np
-    import io
-    import wave
-    
+
     with io.BytesIO(audio_bytes) as wav_file:
-        with wave.open(wav_file, 'rb') as wav:
+        with wave.open(wav_file, "rb") as wav:
             sample_rate = wav.getframerate()
-            n_channels = wav.getnchannels()
-            frames = wav.readframes(wav.getnframes())
+            n_channels  = wav.getnchannels()
+            frames      = wav.readframes(wav.getnframes())
             audio_array = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
 
     if n_channels > 1:
         audio_array = audio_array.reshape(-1, n_channels).mean(axis=1)
-    
-    timestamp = 0.0
-    event = await audio_service.process_audio_chunk(
-        audio_array, session_id, timestamp, sample_rate
-    )
-    
-    fusion_events = await fusion_engine.process_audio_event(event)
-    
-    for fe in fusion_events:
-        update = await qwen_service.analyze_meeting_event(fe)
-        if update:
-            await connection_manager.broadcast_scrum_update(update, session_id)
-    
-    return {"session_id": session_id, "fusion_events_count": len(fusion_events)}
+
+    # Encode as base64 for JSON-safe transport through Redis queue
+    audio_b64 = base64.b64encode(audio_array.astype(np.float32).tobytes()).decode()
+
+    job_id = str(uuid.uuid4())
+    await audio_worker.enqueue({
+        "job_id":      job_id,
+        "session_id":  session_id,
+        "audio_b64":   audio_b64,
+        "sample_rate": sample_rate,
+        "timestamp":   0.0,
+    })
+
+    return {"session_id": session_id, "job_id": job_id, "status": "queued"}
 
 
 @app.post("/video/process")
 async def process_video(session_id: str, file: UploadFile = File(...)):
-    from PIL import Image
-    import io
-    
+    """
+    INGESTION ONLY — validates input, enqueues job.
+    Returns immediately. All AI runs in vision_worker.
+    """
     image_bytes = await file.read()
-    image = Image.open(io.BytesIO(image_bytes))
-    
-    timestamp = 0.0
-    event = await vision_service.analyze_frame(image, session_id, timestamp)
-    
-    fusion_events = await fusion_engine.process_video_event(event)
-    
-    return {"session_id": session_id, "visual_context": event.visual_context}
+    image_b64   = base64.b64encode(image_bytes).decode()
+
+    job_id = str(uuid.uuid4())
+    await vision_worker.enqueue({
+        "job_id":     job_id,
+        "session_id": session_id,
+        "image_b64":  image_b64,
+        "timestamp":  0.0,
+    })
+
+    return {"session_id": session_id, "job_id": job_id, "status": "queued"}
 
 
 @app.post("/trello/sync")
@@ -501,19 +613,64 @@ async def get_trello_lists():
 
 @app.websocket("/ws/{session_id}")
 async def websocket_endpoint(websocket: WebSocket, session_id: str):
+    """
+    INGESTION + OUTPUT layer.
+    - Receives: audio chunks, video frames, control messages
+    - Sends: live scrum updates, task assignments, report_ready events
+    - MUST NOT run any ML — dispatches jobs to workers via Redis queue
+    """
     await connection_manager.connect(websocket, session_id)
     try:
         while True:
-            data = await websocket.receive_text()
-            await connection_manager.handle_message(
-                {"type": "message", "data": data},
-                websocket,
-                session_id
-            )
+            raw = await websocket.receive_text()
+            try:
+                msg = json.loads(raw)
+            except json.JSONDecodeError:
+                await websocket.send_json({"type": "error", "detail": "Invalid JSON"})
+                continue
+
+            msg_type = msg.get("type", "")
+
+            # ── Ping / subscribe (control messages) ──────────────────────
+            if msg_type == "ping":
+                await websocket.send_json({"type": "pong"})
+
+            elif msg_type == "subscribe":
+                await websocket.send_json({"type": "subscribed", "session_id": session_id})
+
+            # ── Audio chunk ingestion ─────────────────────────────────────
+            elif msg_type == "audio_chunk":
+                # Expects: { type, audio_b64, sample_rate, timestamp }
+                job_id = str(uuid.uuid4())
+                await audio_worker.enqueue({
+                    "job_id":      job_id,
+                    "session_id":  session_id,
+                    "audio_b64":   msg.get("audio_b64", ""),
+                    "sample_rate": msg.get("sample_rate", 16000),
+                    "timestamp":   msg.get("timestamp", 0.0),
+                })
+                # Immediate ack — no blocking
+                await websocket.send_json({"type": "ack", "job_id": job_id})
+
+            # ── Video frame ingestion ─────────────────────────────────────
+            elif msg_type == "video_frame":
+                # Expects: { type, image_b64, timestamp }
+                job_id = str(uuid.uuid4())
+                await vision_worker.enqueue({
+                    "job_id":     job_id,
+                    "session_id": session_id,
+                    "image_b64":  msg.get("image_b64", ""),
+                    "timestamp":  msg.get("timestamp", 0.0),
+                })
+                await websocket.send_json({"type": "ack", "job_id": job_id})
+
+            else:
+                await websocket.send_json({"type": "error", "detail": f"Unknown message type: {msg_type}"})
+
     except WebSocketDisconnect:
         connection_manager.disconnect(websocket, session_id)
     except Exception as e:
-        print(f"WebSocket error for session {session_id}: {e}")
+        print(f"[ws] Error for session {session_id}: {e}")
         connection_manager.disconnect(websocket, session_id)
 
 

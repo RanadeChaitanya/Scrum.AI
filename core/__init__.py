@@ -1,9 +1,36 @@
 import redis.asyncio as aioredis
 from typing import Optional, List, Dict, Any
 import json
+import asyncio
+from datetime import datetime
 import os
 from pathlib import Path
 from configs.settings import settings
+
+
+def _safe_json_dumps(obj: Any) -> str:
+    """
+    json.dumps with a fallback encoder for datetime objects.
+    Converts any datetime to ISO 8601 string instead of raising TypeError.
+    """
+    def _default(o):
+        if isinstance(o, datetime):
+            return o.isoformat()
+        raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+    return json.dumps(obj, default=_default)
+
+# In-process fallback Pub/Sub queue — created lazily to stay on the running event loop
+_local_pubsub_queue_instance: Optional[asyncio.Queue] = None
+
+def _get_pubsub_queue() -> asyncio.Queue:
+    """Return (and lazily create) the in-process Pub/Sub fallback queue."""
+    global _local_pubsub_queue_instance
+    if _local_pubsub_queue_instance is None:
+        _local_pubsub_queue_instance = asyncio.Queue()
+    return _local_pubsub_queue_instance
+
+# Keep the old name for any existing import references
+_local_pubsub_queue: Optional[asyncio.Queue] = None  # populated on first use
 
 # ---------------------------------------------------------------------------
 # JSON fallback store — used when Redis is unavailable
@@ -112,19 +139,33 @@ class RedisClient:
     # ------------------------------------------------------------------
     async def publish_event(self, stream: str, event: Dict[str, Any]) -> None:
         if self._redis_ok and self._client:
-            await self._client.xadd(stream, {"data": json.dumps(event)})
+            await self._client.xadd(stream, {"data": _safe_json_dumps(event)})
         else:
-            # Append to fallback list under the stream key
-            await self._redis_rpush(f"stream:{stream}", json.dumps(event))
+            await self._redis_rpush(f"stream:{stream}", _safe_json_dumps(event))
 
     async def read_stream(self, stream: str, last_id: str = "0", count: int = 100):
         if self._redis_ok and self._client:
             return await self._client.xread({stream: last_id}, count=count)
         return []
 
+    async def publish_scrum_event(self, event: Dict[str, Any]) -> None:
+        """
+        Publish a structured scrum event to the Redis Pub/Sub channel.
+        Uses _safe_json_dumps to handle any datetime objects without crashing.
+        """
+        payload = _safe_json_dumps(event)
+        if self._redis_ok and self._client:
+            await self._client.publish(settings.scrum_pubsub_channel, payload)
+            print(f"[redis] Published scrum event event_type={event.get('event_type')!r} "
+                  f"meeting_id={event.get('meeting_id')!r}")
+        else:
+            q = _get_pubsub_queue()
+            await q.put(payload)
+            print(f"[redis] Queued scrum event (fallback) event_type={event.get('event_type')!r}")
+
     async def set_session_state(self, session_id: str, key: str, value: Any) -> None:
         full_key = f"session:{session_id}:{key}"
-        await self._redis_set(full_key, json.dumps(value))
+        await self._redis_set(full_key, _safe_json_dumps(value))
 
     async def get_session_state(self, session_id: str, key: str) -> Optional[Any]:
         full_key = f"session:{session_id}:{key}"
@@ -135,7 +176,7 @@ class RedisClient:
 
     async def append_to_session_list(self, session_id: str, list_name: str, item: Any) -> None:
         full_key = f"session:{session_id}:{list_name}"
-        await self._redis_rpush(full_key, json.dumps(item))
+        await self._redis_rpush(full_key, _safe_json_dumps(item))
 
     async def get_session_list(self, session_id: str, list_name: str) -> List[Any]:
         full_key = f"session:{session_id}:{list_name}"

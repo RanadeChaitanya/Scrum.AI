@@ -261,7 +261,14 @@
 </nav>
 </div>
 <div class="flex items-center gap-6">
-<button class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-primary/20 transition-all">
+<span id="session-badge" class="text-xs text-slate-400 font-mono hidden"></span>
+<button id="start-meeting-btn"
+        onclick="handleStartMeeting()"
+        class="bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-teal-700 transition-all">
+  <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+  Start Meeting
+</button>
+<button id="live-pulse-btn" class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-primary/20 transition-all">
 <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                     Live Pulse
                 </button>
@@ -329,7 +336,7 @@
                                 To Do (3)
                             </h4>
 </div>
-<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4">
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4" id="todo-column">
 <!-- Card 1 -->
 <div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer">
 <div class="flex justify-between mb-3">
@@ -368,7 +375,7 @@
                                 In Progress (1)
                             </h4>
 </div>
-<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4">
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4" id="inprogress-column">
 <div class="bg-surface-container-lowest p-4 rounded-lg shadow-md border-l-4 border-tertiary-container glow-pulse cursor-pointer">
 <div class="flex justify-between mb-3">
 <span class="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded uppercase">Update</span>
@@ -396,7 +403,7 @@
                                 Completed (12)
                             </h4>
 </div>
-<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4 opacity-75 grayscale-[0.2]">
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4 opacity-75 grayscale-[0.2]" id="done-column">
 <div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border border-transparent cursor-pointer">
 <div class="flex justify-between mb-3">
 <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">Task</span>
@@ -441,8 +448,23 @@
       const data = await res.json();
       localStorage.setItem('scrumai_session_id', data.session_id);
       console.log('[meeting] Started:', data.session_id);
+      _updateSessionBadge(data.session_id);
+      initWebSocket(data.session_id);
+      return data.session_id;
     } catch (e) {
       console.error('[meeting] Failed to start:', e);
+      return null;
+    }
+  }
+
+  function _updateSessionBadge(sessionId) {
+    const badge = document.getElementById('session-badge');
+    if (badge) badge.textContent = 'Session: ' + sessionId.slice(0, 8) + '…';
+    const livePulse = document.getElementById('live-pulse-btn');
+    if (livePulse) {
+      livePulse.classList.remove('bg-primary/10', 'text-primary');
+      livePulse.classList.add('bg-green-100', 'text-green-700');
+      livePulse.querySelector('span.w-2')?.classList.add('bg-green-500');
     }
   }
 
@@ -460,7 +482,7 @@
       });
       localStorage.removeItem('scrumai_session_id');
       stopSharing();
-      window.location.href = '/scrum-report';
+      // Report will arrive via WebSocket report_ready event
     } catch (e) {
       console.error('[meeting] Failed to end:', e);
       btn.disabled = false;
@@ -468,9 +490,202 @@
     }
   }
 
-  // ─── Screen Share State ──────────────────────────────────────────────────────
-  let _stream = null;          // active MediaStream
-  let _shareType = null;       // 'browser' | 'window' | 'monitor'
+  // ─── Live Scrum Board State ──────────────────────────────────────────────────
+  const _board = { todo: [], inProgress: [], done: [] };
+
+  function _priorityColor(priority) {
+    return { high: '#ba1a1a', medium: '#006591', low: '#006c49' }[priority] || '#6c7a77';
+  }
+
+  function _addTaskCard(columnId, task, owner, priority, source) {
+    const col = document.getElementById(columnId);
+    if (!col) return;
+    const card = document.createElement('div');
+    card.className = 'bg-surface-container-lowest p-4 rounded-lg shadow-sm border-l-4 transition-all cursor-pointer animate-pulse-once';
+    card.style.borderColor = _priorityColor(priority);
+    card.innerHTML = `
+      <div class="flex justify-between mb-2">
+        <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">${source}</span>
+        <span class="text-[10px] font-bold" style="color:${_priorityColor(priority)}">${(priority||'medium').toUpperCase()}</span>
+      </div>
+      <p class="text-sm font-semibold mb-3 leading-snug">${task}</p>
+      ${owner ? `<p class="text-[10px] text-on-surface-variant">Owner: <span class="font-bold">${owner}</span></p>` : ''}
+      <p class="text-[10px] text-on-surface-variant mt-1 opacity-60">via AI • just now</p>
+    `;
+    // Insert at top for recency
+    col.insertBefore(card, col.firstChild);
+    // Remove pulse after animation
+    setTimeout(() => card.classList.remove('animate-pulse-once'), 1500);
+  }
+
+  function _addInsightBadge(content, source) {
+    const rail = document.getElementById('live-insights-list');
+    if (!rail) return;
+    const badge = document.createElement('div');
+    badge.className = 'p-3 bg-surface-container-high/50 rounded-lg border border-primary/5 mb-2';
+    badge.innerHTML = `
+      <p class="text-xs font-bold mb-1 capitalize">${source.replace('_', ' ')}</p>
+      <p class="text-[10px] leading-tight text-on-surface-variant">${content}</p>
+    `;
+    rail.insertBefore(badge, rail.firstChild);
+    // Keep only last 5 insights
+    while (rail.children.length > 5) rail.removeChild(rail.lastChild);
+  }
+
+  function _updateSharingStatus(text) {
+    const el = document.getElementById('share-status-text');
+    if (el) el.textContent = text;
+  }
+
+  // ─── WebSocket — live event handling ────────────────────────────────────────
+  let _ws = null;
+
+  function initWebSocket(sessionId) {
+    if (_ws && _ws.readyState === WebSocket.OPEN) return;
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    _ws = new WebSocket(`${protocol}//${location.host}/ws/${sessionId}`);
+
+    _ws.onopen = () => {
+      console.log('[ws] Connected for session', sessionId);
+      _ws.send(JSON.stringify({ type: 'subscribe' }));
+      _updateSharingStatus('Live');
+    };
+
+    _ws.onmessage = (event) => {
+      let msg;
+      try { msg = JSON.parse(event.data); } catch { return; }
+      handleLiveEvent(msg);
+    };
+
+    _ws.onclose = () => {
+      console.log('[ws] Connection closed — reconnecting in 3s');
+      _updateSharingStatus('Reconnecting…');
+      setTimeout(() => initWebSocket(sessionId), 3000);
+    };
+
+    _ws.onerror = (e) => console.error('[ws] Error:', e);
+  }
+
+  function handleLiveEvent(msg) {
+    const type = msg.event_type || msg.type;
+    console.log('[live] event received:', type, msg);
+
+    switch (type) {
+
+      // ── New Scrum task extracted by Qwen reasoning ──────────────────────
+      case 'scrum_update': {
+        const d = msg.data || {};
+        // task can come from d.task (AI worker) or msg.content (test/debug events)
+        const task = d.task || msg.content || '';
+        const status = d.status || 'todo';
+        const owner  = d.owner || null;
+        const prio   = d.priority || msg.priority || 'medium';
+        const src    = msg.source || 'AI';
+
+        if (task) {
+          const colMap = {
+            'todo':        'todo-column',
+            'in-progress': 'inprogress-column',
+            'done':        'done-column',
+            'blocked':     'todo-column',
+          };
+          const col = colMap[status] || 'todo-column';
+          _addTaskCard(col, task, owner, prio, src);
+          _addInsightBadge(
+            `New task: "${task}" [${status}]${owner ? ' → ' + owner : ''}`,
+            'scrum_update'
+          );
+        }
+        if (d.blocker)  _addInsightBadge(`🚧 Blocker: ${d.blocker}`, 'blocker');
+        if (d.decision) _addInsightBadge(`✅ Decision: ${d.decision}`, 'decision');
+        break;
+      }
+
+      // ── Live transcript from audio worker ───────────────────────────────
+      case 'transcript_ready': {
+        if (msg.content) _addInsightBadge(msg.content, 'transcript');
+        break;
+      }
+
+      // ── Visual context from vision worker ───────────────────────────────
+      case 'visual_context': {
+        if (msg.content) _addInsightBadge(`👁 ${msg.content}`, 'visual');
+        break;
+      }
+
+      // ── Final report ready from DeepSeek ────────────────────────────────
+      case 'report_ready': {
+        const d = msg.data || {};
+        (d.tasks || []).forEach(t => {
+          if (t.task) _addTaskCard('done-column', t.task, t.owner, 'high', 'report');
+        });
+        _addInsightBadge(`📋 Report ready: ${(msg.content || '').slice(0, 100)}`, 'report');
+        setTimeout(() => { window.location.href = '/scrum-report'; }, 2500);
+        break;
+      }
+
+      // ── System acks ─────────────────────────────────────────────────────
+      case 'ack':
+        console.log('[ws] Job queued:', msg.job_id);
+        break;
+
+      case 'subscribed':
+        console.log('[ws] Subscribed to session:', msg.session_id);
+        break;
+
+      default:
+        // Unknown event — show in insights rail for visibility
+        if (msg.content) _addInsightBadge(`[${type}] ${msg.content}`, msg.source || 'system');
+    }
+  }
+
+  function _flashColumnHeader(colId) {
+    // Flash the column container border briefly
+    const col = document.getElementById(colId);
+    if (!col) return;
+    col.style.transition = 'box-shadow 0.3s';
+    col.style.boxShadow  = '0 0 0 2px #14b8a6';
+    setTimeout(() => { col.style.boxShadow = ''; }, 1200);
+  }
+
+  // ─── Auto-start: connect WebSocket as soon as page loads ────────────────────
+  // If no session exists, auto-create one so live events work immediately.
+  (async () => {
+    let sid = getSessionId();
+    if (!sid) {
+      console.log('[meeting] No session — auto-starting…');
+      sid = await startMeeting();
+    } else {
+      console.log('[meeting] Resuming session:', sid);
+      _updateSessionBadge(sid);
+      initWebSocket(sid);
+    }
+    // Show session badge
+    const badge = document.getElementById('session-badge');
+    if (badge && sid) {
+      badge.textContent = 'Session: ' + sid.slice(0, 8) + '…';
+      badge.classList.remove('hidden');
+    }
+  })();
+
+  async function handleStartMeeting() {
+    const btn = document.getElementById('start-meeting-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+    const sid = await startMeeting();
+    if (sid && btn) {
+      btn.textContent = '✓ Live';
+      btn.classList.replace('bg-teal-600', 'bg-green-600');
+    } else if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Start Meeting';
+    }
+  }
+
+  // ─── WebSocket for live updates ───────────────────────────────────────────────
+  // NOTE: initWebSocket() above is the canonical handler.
+  // This block is intentionally removed — the duplicate was overriding it.
+  let _stream = null;
+  let _shareType = null;
 
   // ─── Modal controls ──────────────────────────────────────────────────────────
   function openShareModal() {
@@ -629,14 +844,8 @@
   }
 
   // ─── WebSocket for live updates ───────────────────────────────────────────────
-  const sessionId = getSessionId();
-  if (sessionId) {
-    const ws = new WebSocket(`ws://${location.host}/ws/${sessionId}`);
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      console.log('[ws] Live update:', msg);
-    };
-  }
+  // NOTE: initWebSocket() above is the canonical handler.
+  // This block is intentionally removed — the duplicate was overriding it.
 </script>
 <!-- Intelligence Rail (Right-aligned AI suggestions as per design system) -->
 <div class="fixed right-0 top-1/4 h-1/2 w-1.5 bg-tertiary-container/30 rounded-l-full cursor-pointer hover:w-64 group transition-all duration-300 z-30 overflow-hidden flex flex-col glass-card border-l border-primary/10">
@@ -645,7 +854,7 @@
 <span class="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
 <h5 class="font-headline font-bold text-sm uppercase tracking-tighter">Live Insights</h5>
 </div>
-<div class="space-y-4">
+<div class="space-y-4" id="live-insights-list">
 <div class="p-3 bg-surface-container-high/50 rounded-lg border border-primary/5">
 <p class="text-xs font-bold mb-1">Velocity Warning</p>
 <p class="text-[10px] leading-tight text-on-surface-variant">Current pace is 15% lower than sprint average. Suggest splitting Task #42.</p>
