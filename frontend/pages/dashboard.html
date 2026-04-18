@@ -98,7 +98,110 @@
     </style>
 </head>
 <body class="bg-background text-on-background font-body min-h-screen overflow-x-hidden">
-<!-- Notification Toast -->
+<!-- Share Screen Modal -->
+<div id="share-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+    <!-- Modal Header -->
+    <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center">
+            <span class="material-symbols-outlined text-teal-600" style="font-variation-settings:'FILL' 1;">screen_share</span>
+          </div>
+          <div>
+            <h2 class="font-headline font-bold text-gray-900 text-lg">Share your screen</h2>
+            <p class="text-xs text-gray-400">ScrumAI will capture and analyze your meeting</p>
+          </div>
+        </div>
+        <button onclick="closeShareModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Share Options -->
+    <div class="px-6 py-5 space-y-3">
+      <p class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Select what to share</p>
+
+      <!-- Browser Tab (preferred) -->
+      <button onclick="startShare('browser')"
+              class="share-option w-full flex items-center gap-4 p-4 rounded-xl border-2 border-teal-500 bg-teal-50 hover:bg-teal-100 transition-all group">
+        <div class="w-10 h-10 rounded-lg bg-teal-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-teal-600" style="font-variation-settings:'FILL' 1;">tab</span>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-gray-800 text-sm">Browser Tab</p>
+          <p class="text-xs text-gray-500">Share a specific tab — best for meeting apps</p>
+        </div>
+        <span class="ml-auto text-[10px] font-bold bg-teal-500 text-white px-2 py-0.5 rounded-full">Recommended</span>
+      </button>
+
+      <!-- Application Window -->
+      <button onclick="startShare('window')"
+              class="share-option w-full flex items-center gap-4 p-4 rounded-xl border-2 border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all">
+        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-gray-600" style="font-variation-settings:'FILL' 1;">web_asset</span>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-gray-800 text-sm">Application Window</p>
+          <p class="text-xs text-gray-500">Share a specific app window</p>
+        </div>
+      </button>
+
+      <!-- Entire Screen -->
+      <button onclick="startShare('monitor')"
+              class="share-option w-full flex items-center gap-4 p-4 rounded-xl border-2 border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all">
+        <div class="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-gray-600" style="font-variation-settings:'FILL' 1;">desktop_windows</span>
+        </div>
+        <div class="text-left">
+          <p class="font-bold text-gray-800 text-sm">Entire Screen</p>
+          <p class="text-xs text-gray-500">Share your full display</p>
+        </div>
+      </button>
+    </div>
+
+    <!-- Error state -->
+    <div id="share-error" class="hidden mx-6 mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+      <span class="material-symbols-outlined text-red-500 text-sm mt-0.5">error</span>
+      <p id="share-error-msg" class="text-xs text-red-600"></p>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 pb-6 flex gap-3">
+      <button onclick="joinWithoutSharing()"
+              class="flex-1 py-3 rounded-xl border border-gray-200 text-gray-500 text-sm font-medium hover:bg-gray-50 transition-all">
+        Join without sharing
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Screen Share Preview Bar (shown while sharing) -->
+<div id="share-bar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center gap-4 min-w-[340px]">
+  <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+  <div class="flex-1">
+    <p class="text-sm font-bold">Sharing your screen</p>
+    <p id="share-bar-label" class="text-xs text-gray-400">ScrumAI is capturing your meeting</p>
+  </div>
+  <!-- Inline video preview thumbnail -->
+  <video id="share-preview" autoplay muted playsinline
+         class="w-20 h-12 rounded-lg object-cover border border-white/20 bg-black"></video>
+  <button onclick="stopSharing()"
+          class="flex items-center gap-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition-colors">
+    <span class="material-symbols-outlined text-sm">stop_screen_share</span>
+    Stop
+  </button>
+</div>
+
+<!-- Full screen share view (hidden by default, shown on expand) -->
+<div id="share-fullview" class="hidden fixed inset-0 z-40 bg-black/90 flex items-center justify-center">
+  <video id="share-video-full" autoplay muted playsinline class="max-w-full max-h-full rounded-xl shadow-2xl"></video>
+  <button onclick="document.getElementById('share-fullview').classList.add('hidden')"
+          class="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors">
+    <span class="material-symbols-outlined">close_fullscreen</span>
+  </button>
+</div>
 <!-- SideNavBar -->
 <aside class="fixed left-0 top-0 h-full w-64 bg-slate-50 dark:bg-slate-900 border-r-0 flex flex-col py-6 font-['Space_Grotesk'] tracking-tight z-50">
 <div class="px-6 mb-10">
@@ -158,7 +261,14 @@
 </nav>
 </div>
 <div class="flex items-center gap-6">
-<button class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-primary/20 transition-all">
+<span id="session-badge" class="text-xs text-slate-400 font-mono hidden"></span>
+<button id="start-meeting-btn"
+        onclick="handleStartMeeting()"
+        class="bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-teal-700 transition-all">
+  <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+  Start Meeting
+</button>
+<button id="live-pulse-btn" class="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-primary/20 transition-all">
 <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                     Live Pulse
                 </button>
@@ -175,13 +285,15 @@
 <p class="text-on-surface-variant text-sm mb-8 leading-relaxed max-w-md">Connect your meeting window to ScrumAI. Our neural processor will extract tasks and updates in real-time while you speak.</p>
 </div>
 <div class="w-full flex items-center justify-between">
-<button class="pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all">
+<button id="share-btn"
+        onclick="openShareModal()"
+        class="pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all">
 <span class="material-symbols-outlined" data-icon="screen_share">screen_share</span>
                             Share Screen / Tab
                         </button>
-<div class="flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full">
-<span class="w-2 h-2 rounded-full bg-error"></span>
-<span class="text-xs font-bold font-label uppercase tracking-wider">Sharing Inactive</span>
+<div id="share-status" class="flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full">
+<span id="share-status-dot" class="w-2 h-2 rounded-full bg-error"></span>
+<span id="share-status-text" class="text-xs font-bold font-label uppercase tracking-wider">Sharing Inactive</span>
 </div>
 </div>
 </div>
@@ -224,7 +336,7 @@
                                 To Do (3)
                             </h4>
 </div>
-<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4">
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4" id="todo-column">
 <!-- Card 1 -->
 <div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer">
 <div class="flex justify-between mb-3">
@@ -263,7 +375,7 @@
                                 In Progress (1)
                             </h4>
 </div>
-<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4">
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4" id="inprogress-column">
 <div class="bg-surface-container-lowest p-4 rounded-lg shadow-md border-l-4 border-tertiary-container glow-pulse cursor-pointer">
 <div class="flex justify-between mb-3">
 <span class="px-2 py-0.5 bg-tertiary-container text-on-tertiary-container text-[10px] font-bold rounded uppercase">Update</span>
@@ -291,7 +403,7 @@
                                 Completed (12)
                             </h4>
 </div>
-<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4 opacity-75 grayscale-[0.2]">
+<div class="bg-surface-container-low rounded-xl p-3 min-h-[400px] space-y-4 opacity-75 grayscale-[0.2]" id="done-column">
 <div class="bg-surface-container-lowest p-4 rounded-lg shadow-sm border border-transparent cursor-pointer">
 <div class="flex justify-between mb-3">
 <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">Task</span>
@@ -320,7 +432,7 @@
 </div>
 
 <script>
-  // Read session_id from URL param or localStorage
+  // ─── Session helpers ────────────────────────────────────────────────────────
   function getSessionId() {
     const params = new URLSearchParams(window.location.search);
     return params.get('session') || localStorage.getItem('scrumai_session_id');
@@ -335,46 +447,405 @@
       });
       const data = await res.json();
       localStorage.setItem('scrumai_session_id', data.session_id);
-      console.log('Meeting started:', data.session_id);
+      console.log('[meeting] Started:', data.session_id);
+      _updateSessionBadge(data.session_id);
+      initWebSocket(data.session_id);
+      return data.session_id;
     } catch (e) {
-      console.error('Failed to start meeting:', e);
+      console.error('[meeting] Failed to start:', e);
+      return null;
+    }
+  }
+
+  function _updateSessionBadge(sessionId) {
+    const badge = document.getElementById('session-badge');
+    if (badge) badge.textContent = 'Session: ' + sessionId.slice(0, 8) + '…';
+    const livePulse = document.getElementById('live-pulse-btn');
+    if (livePulse) {
+      livePulse.classList.remove('bg-primary/10', 'text-primary');
+      livePulse.classList.add('bg-green-100', 'text-green-700');
+      livePulse.querySelector('span.w-2')?.classList.add('bg-green-500');
     }
   }
 
   async function endMeeting() {
     const sessionId = getSessionId();
-    if (!sessionId) {
-      alert('No active session. Please start a meeting first.');
-      return;
-    }
+    if (!sessionId) { alert('No active session. Please start a meeting first.'); return; }
     const btn = document.getElementById('end-meeting-btn');
     btn.disabled = true;
     btn.textContent = 'Analyzing…';
     try {
-      const res = await fetch('/meeting/end', {
+      await fetch('/meeting/end', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ session_id: sessionId, generate_report: true })
       });
-      const data = await res.json();
       localStorage.removeItem('scrumai_session_id');
-      window.location.href = '/scrum-report';
+      stopSharing();
+      // Report will arrive via WebSocket report_ready event
     } catch (e) {
-      console.error('Failed to end meeting:', e);
+      console.error('[meeting] Failed to end:', e);
       btn.disabled = false;
-      btn.textContent = 'End Meeting & Analyze';
+      btn.innerHTML = '<span class="material-symbols-outlined group-hover:scale-110 transition-transform">auto_fix</span> End Meeting &amp; Analyze';
     }
   }
 
-  // Connect WebSocket for live updates if a session is active
-  const sessionId = getSessionId();
-  if (sessionId) {
-    const ws = new WebSocket(`ws://${location.host}/ws/${sessionId}`);
-    ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data);
-      console.log('Live update:', msg);
-    };
+  // ─── Live Scrum Board State ──────────────────────────────────────────────────
+  const _board = { todo: [], inProgress: [], done: [] };
+
+  function _priorityColor(priority) {
+    return { high: '#ba1a1a', medium: '#006591', low: '#006c49' }[priority] || '#6c7a77';
   }
+
+  function _addTaskCard(columnId, task, owner, priority, source) {
+    const col = document.getElementById(columnId);
+    if (!col) return;
+    const card = document.createElement('div');
+    card.className = 'bg-surface-container-lowest p-4 rounded-lg shadow-sm border-l-4 transition-all cursor-pointer animate-pulse-once';
+    card.style.borderColor = _priorityColor(priority);
+    card.innerHTML = `
+      <div class="flex justify-between mb-2">
+        <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded uppercase">${source}</span>
+        <span class="text-[10px] font-bold" style="color:${_priorityColor(priority)}">${(priority||'medium').toUpperCase()}</span>
+      </div>
+      <p class="text-sm font-semibold mb-3 leading-snug">${task}</p>
+      ${owner ? `<p class="text-[10px] text-on-surface-variant">Owner: <span class="font-bold">${owner}</span></p>` : ''}
+      <p class="text-[10px] text-on-surface-variant mt-1 opacity-60">via AI • just now</p>
+    `;
+    // Insert at top for recency
+    col.insertBefore(card, col.firstChild);
+    // Remove pulse after animation
+    setTimeout(() => card.classList.remove('animate-pulse-once'), 1500);
+  }
+
+  function _addInsightBadge(content, source) {
+    const rail = document.getElementById('live-insights-list');
+    if (!rail) return;
+    const badge = document.createElement('div');
+    badge.className = 'p-3 bg-surface-container-high/50 rounded-lg border border-primary/5 mb-2';
+    badge.innerHTML = `
+      <p class="text-xs font-bold mb-1 capitalize">${source.replace('_', ' ')}</p>
+      <p class="text-[10px] leading-tight text-on-surface-variant">${content}</p>
+    `;
+    rail.insertBefore(badge, rail.firstChild);
+    // Keep only last 5 insights
+    while (rail.children.length > 5) rail.removeChild(rail.lastChild);
+  }
+
+  function _updateSharingStatus(text) {
+    const el = document.getElementById('share-status-text');
+    if (el) el.textContent = text;
+  }
+
+  // ─── WebSocket — live event handling ────────────────────────────────────────
+  let _ws = null;
+
+  function initWebSocket(sessionId) {
+    if (_ws && _ws.readyState === WebSocket.OPEN) return;
+    const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    _ws = new WebSocket(`${protocol}//${location.host}/ws/${sessionId}`);
+
+    _ws.onopen = () => {
+      console.log('[ws] Connected for session', sessionId);
+      _ws.send(JSON.stringify({ type: 'subscribe' }));
+      _updateSharingStatus('Live');
+    };
+
+    _ws.onmessage = (event) => {
+      let msg;
+      try { msg = JSON.parse(event.data); } catch { return; }
+      handleLiveEvent(msg);
+    };
+
+    _ws.onclose = () => {
+      console.log('[ws] Connection closed — reconnecting in 3s');
+      _updateSharingStatus('Reconnecting…');
+      setTimeout(() => initWebSocket(sessionId), 3000);
+    };
+
+    _ws.onerror = (e) => console.error('[ws] Error:', e);
+  }
+
+  function handleLiveEvent(msg) {
+    const type = msg.event_type || msg.type;
+    console.log('[live] event received:', type, msg);
+
+    switch (type) {
+
+      // ── New Scrum task extracted by Qwen reasoning ──────────────────────
+      case 'scrum_update': {
+        const d = msg.data || {};
+        // task can come from d.task (AI worker) or msg.content (test/debug events)
+        const task = d.task || msg.content || '';
+        const status = d.status || 'todo';
+        const owner  = d.owner || null;
+        const prio   = d.priority || msg.priority || 'medium';
+        const src    = msg.source || 'AI';
+
+        if (task) {
+          const colMap = {
+            'todo':        'todo-column',
+            'in-progress': 'inprogress-column',
+            'done':        'done-column',
+            'blocked':     'todo-column',
+          };
+          const col = colMap[status] || 'todo-column';
+          _addTaskCard(col, task, owner, prio, src);
+          _addInsightBadge(
+            `New task: "${task}" [${status}]${owner ? ' → ' + owner : ''}`,
+            'scrum_update'
+          );
+        }
+        if (d.blocker)  _addInsightBadge(`🚧 Blocker: ${d.blocker}`, 'blocker');
+        if (d.decision) _addInsightBadge(`✅ Decision: ${d.decision}`, 'decision');
+        break;
+      }
+
+      // ── Live transcript from audio worker ───────────────────────────────
+      case 'transcript_ready': {
+        if (msg.content) _addInsightBadge(msg.content, 'transcript');
+        break;
+      }
+
+      // ── Visual context from vision worker ───────────────────────────────
+      case 'visual_context': {
+        if (msg.content) _addInsightBadge(`👁 ${msg.content}`, 'visual');
+        break;
+      }
+
+      // ── Final report ready from DeepSeek ────────────────────────────────
+      case 'report_ready': {
+        const d = msg.data || {};
+        (d.tasks || []).forEach(t => {
+          if (t.task) _addTaskCard('done-column', t.task, t.owner, 'high', 'report');
+        });
+        _addInsightBadge(`📋 Report ready: ${(msg.content || '').slice(0, 100)}`, 'report');
+        setTimeout(() => { window.location.href = '/scrum-report'; }, 2500);
+        break;
+      }
+
+      // ── System acks ─────────────────────────────────────────────────────
+      case 'ack':
+        console.log('[ws] Job queued:', msg.job_id);
+        break;
+
+      case 'subscribed':
+        console.log('[ws] Subscribed to session:', msg.session_id);
+        break;
+
+      default:
+        // Unknown event — show in insights rail for visibility
+        if (msg.content) _addInsightBadge(`[${type}] ${msg.content}`, msg.source || 'system');
+    }
+  }
+
+  function _flashColumnHeader(colId) {
+    // Flash the column container border briefly
+    const col = document.getElementById(colId);
+    if (!col) return;
+    col.style.transition = 'box-shadow 0.3s';
+    col.style.boxShadow  = '0 0 0 2px #14b8a6';
+    setTimeout(() => { col.style.boxShadow = ''; }, 1200);
+  }
+
+  // ─── Auto-start: connect WebSocket as soon as page loads ────────────────────
+  // If no session exists, auto-create one so live events work immediately.
+  (async () => {
+    let sid = getSessionId();
+    if (!sid) {
+      console.log('[meeting] No session — auto-starting…');
+      sid = await startMeeting();
+    } else {
+      console.log('[meeting] Resuming session:', sid);
+      _updateSessionBadge(sid);
+      initWebSocket(sid);
+    }
+    // Show session badge
+    const badge = document.getElementById('session-badge');
+    if (badge && sid) {
+      badge.textContent = 'Session: ' + sid.slice(0, 8) + '…';
+      badge.classList.remove('hidden');
+    }
+  })();
+
+  async function handleStartMeeting() {
+    const btn = document.getElementById('start-meeting-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+    const sid = await startMeeting();
+    if (sid && btn) {
+      btn.textContent = '✓ Live';
+      btn.classList.replace('bg-teal-600', 'bg-green-600');
+    } else if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Start Meeting';
+    }
+  }
+
+  // ─── WebSocket for live updates ───────────────────────────────────────────────
+  // NOTE: initWebSocket() above is the canonical handler.
+  // This block is intentionally removed — the duplicate was overriding it.
+  let _stream = null;
+  let _shareType = null;
+
+  // ─── Modal controls ──────────────────────────────────────────────────────────
+  function openShareModal() {
+    // Check browser support first
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      showShareError('Screen sharing is not supported in this browser. Please use Chrome, Edge, or Firefox.');
+      return;
+    }
+    document.getElementById('share-modal').classList.remove('hidden');
+    document.getElementById('share-error').classList.add('hidden');
+  }
+
+  function closeShareModal() {
+    document.getElementById('share-modal').classList.add('hidden');
+    document.getElementById('share-error').classList.add('hidden');
+  }
+
+  function showShareError(msg) {
+    const el = document.getElementById('share-error');
+    document.getElementById('share-error-msg').textContent = msg;
+    el.classList.remove('hidden');
+  }
+
+  // ─── Start sharing ────────────────────────────────────────────────────────────
+  async function startShare(surfaceType) {
+    // surfaceType: 'browser' | 'window' | 'monitor'
+    const constraints = {
+      video: {
+        displaySurface: surfaceType,   // hint to browser — user can still override
+        frameRate: { ideal: 15, max: 30 },
+        width:  { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100,
+      }
+    };
+
+    try {
+      _stream = await navigator.mediaDevices.getDisplayMedia(constraints);
+      _shareType = surfaceType;
+    } catch (err) {
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        showShareError('Permission denied. Please allow screen sharing when prompted.');
+      } else if (err.name === 'NotFoundError') {
+        showShareError('No screen source found. Please try a different option.');
+      } else if (err.name === 'AbortError') {
+        // User cancelled the picker — treat as "join without sharing"
+        closeShareModal();
+        joinWithoutSharing();
+        return;
+      } else {
+        showShareError(`Screen sharing failed: ${err.message}`);
+      }
+      return;
+    }
+
+    // Attach stream to preview elements
+    const previewEl = document.getElementById('share-preview');
+    const fullEl    = document.getElementById('share-video-full');
+    previewEl.srcObject = _stream;
+    fullEl.srcObject    = _stream;
+
+    // Listen for user stopping share via browser's built-in "Stop sharing" button
+    _stream.getVideoTracks()[0].addEventListener('ended', () => {
+      stopSharing();
+    });
+
+    // Update UI
+    closeShareModal();
+    _setShareActive(true, surfaceType);
+
+    // Start meeting session if not already started
+    if (!getSessionId()) {
+      await startMeeting();
+    }
+
+    console.log('[screenshare] Started:', surfaceType, _stream.getTracks());
+  }
+
+  // ─── Stop sharing ─────────────────────────────────────────────────────────────
+  function stopSharing() {
+    if (_stream) {
+      _stream.getTracks().forEach(track => track.stop());
+      _stream = null;
+    }
+    const previewEl = document.getElementById('share-preview');
+    const fullEl    = document.getElementById('share-video-full');
+    if (previewEl) previewEl.srcObject = null;
+    if (fullEl)    fullEl.srcObject    = null;
+
+    _setShareActive(false);
+    console.log('[screenshare] Stopped');
+  }
+
+  // ─── Join without sharing ─────────────────────────────────────────────────────
+  async function joinWithoutSharing() {
+    closeShareModal();
+    if (!getSessionId()) {
+      await startMeeting();
+    }
+    console.log('[meeting] Joined without screen share');
+  }
+
+  // ─── UI state helper ──────────────────────────────────────────────────────────
+  function _setShareActive(active, surfaceType) {
+    const bar        = document.getElementById('share-bar');
+    const statusEl   = document.getElementById('share-status');
+    const statusDot  = document.getElementById('share-status-dot');
+    const statusText = document.getElementById('share-status-text');
+    const shareBtn   = document.getElementById('share-btn');
+    const barLabel   = document.getElementById('share-bar-label');
+
+    const labels = {
+      browser: 'Sharing browser tab',
+      window:  'Sharing application window',
+      monitor: 'Sharing entire screen',
+    };
+
+    if (active) {
+      // Show share bar
+      bar.classList.remove('hidden');
+      barLabel.textContent = labels[surfaceType] || 'Sharing screen';
+
+      // Update status pill → green "Sharing Active"
+      statusEl.className = 'flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full';
+      statusDot.className = 'w-2 h-2 rounded-full bg-green-500 animate-pulse';
+      statusText.textContent = 'Sharing Active';
+
+      // Change button to "Stop Sharing"
+      shareBtn.innerHTML = `
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1;">stop_screen_share</span>
+        Stop Sharing
+      `;
+      shareBtn.onclick = stopSharing;
+      shareBtn.className = 'bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 transition-all';
+    } else {
+      // Hide share bar
+      bar.classList.add('hidden');
+
+      // Reset status pill → red "Sharing Inactive"
+      statusEl.className = 'flex items-center gap-2 px-4 py-2 bg-error-container text-on-error-container rounded-full';
+      statusDot.className = 'w-2 h-2 rounded-full bg-error';
+      statusText.textContent = 'Sharing Inactive';
+
+      // Reset button
+      shareBtn.innerHTML = `
+        <span class="material-symbols-outlined">screen_share</span>
+        Share Screen / Tab
+      `;
+      shareBtn.onclick = openShareModal;
+      shareBtn.className = 'pulse-gradient text-white px-6 py-3 rounded-lg font-bold flex items-center gap-2 hover:scale-105 active:scale-95 transition-all';
+    }
+  }
+
+  // ─── WebSocket for live updates ───────────────────────────────────────────────
+  // NOTE: initWebSocket() above is the canonical handler.
+  // This block is intentionally removed — the duplicate was overriding it.
 </script>
 <!-- Intelligence Rail (Right-aligned AI suggestions as per design system) -->
 <div class="fixed right-0 top-1/4 h-1/2 w-1.5 bg-tertiary-container/30 rounded-l-full cursor-pointer hover:w-64 group transition-all duration-300 z-30 overflow-hidden flex flex-col glass-card border-l border-primary/10">
@@ -383,7 +854,7 @@
 <span class="material-symbols-outlined text-tertiary" data-icon="bolt">bolt</span>
 <h5 class="font-headline font-bold text-sm uppercase tracking-tighter">Live Insights</h5>
 </div>
-<div class="space-y-4">
+<div class="space-y-4" id="live-insights-list">
 <div class="p-3 bg-surface-container-high/50 rounded-lg border border-primary/5">
 <p class="text-xs font-bold mb-1">Velocity Warning</p>
 <p class="text-[10px] leading-tight text-on-surface-variant">Current pace is 15% lower than sprint average. Suggest splitting Task #42.</p>

@@ -119,7 +119,20 @@
                 </p>
 <!-- Action Area -->
 <div class="w-full space-y-4">
-<button class="w-full pulse-gradient text-on-primary font-medium py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-transform duration-200 active:scale-95 group" onclick="window.location.href='/trello/connect'">
+<!-- Profile card — shown after successful auth -->
+<div id="profile-card" class="hidden w-full bg-surface-container-low rounded-lg p-4 flex items-center gap-4 text-left">
+  <img id="profile-avatar" src="" alt="avatar"
+       class="w-12 h-12 rounded-full object-cover border-2 border-primary-container"/>
+  <div>
+    <p id="profile-name" class="font-headline font-semibold text-on-surface text-sm"></p>
+    <p id="profile-username" class="text-on-surface-variant text-xs"></p>
+    <span class="inline-block mt-1 text-[10px] bg-primary-container/20 text-primary px-2 py-0.5 rounded-full">Connected</span>
+  </div>
+</div>
+
+<button id="connect-btn"
+        class="w-full pulse-gradient text-on-primary font-medium py-4 px-6 rounded-lg flex items-center justify-center gap-3 transition-transform duration-200 active:scale-95 group"
+        onclick="window.location.href='/trello/connect'">
 <svg class="w-5 h-5 fill-current" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M19.34 2H4.66C3.19 2 2 3.19 2 4.66v14.68C2 20.81 3.19 22 4.66 22h14.68c1.47 0 2.66-1.19 2.66-2.66V4.66C22 3.19 20.81 2 19.34 2zM10.15 17.5c0 .36-.29.65-.65.65H5.85a.65.65 0 01-.65-.65V5.85c0-.36.29-.65.65-.65h3.65c.36 0 .65.29.65.65v11.65zm8.65-4.5c0 .36-.29.65-.65.65h-3.65a.65.65 0 01-.65-.65V5.85c0-.36.29-.65.65-.65h3.65c.36 0 .65.29.65.65V13z"></path>
 </svg>
@@ -129,6 +142,38 @@
                         Need help?
                     </button>
 </div>
+
+<script>
+// Check if already authenticated — fetch profile from secure backend endpoint.
+// The Trello token is NEVER stored in or read from localStorage/frontend.
+(async () => {
+  try {
+    const res = await fetch('/api/user/profile');
+    if (!res.ok) return; // not authenticated yet — show connect button
+
+    const profile = await res.json();
+
+    // Show profile card, hide connect button
+    document.getElementById('profile-card').classList.remove('hidden');
+    document.getElementById('profile-card').classList.add('flex');
+    document.getElementById('connect-btn').textContent = '✓ Reconnect Trello';
+    document.getElementById('connect-btn').classList.remove('pulse-gradient');
+    document.getElementById('connect-btn').classList.add('bg-surface-container-high', 'text-on-surface');
+
+    document.getElementById('profile-name').textContent = profile.fullName || 'Trello User';
+    document.getElementById('profile-username').textContent = '@' + (profile.username || '');
+
+    if (profile.avatarUrl) {
+      document.getElementById('profile-avatar').src = profile.avatarUrl + '/50.png';
+    } else {
+      document.getElementById('profile-avatar').src =
+        'https://ui-avatars.com/api/?name=' + encodeURIComponent(profile.fullName || 'T') + '&background=14b8a6&color=fff';
+    }
+  } catch (e) {
+    // Network error — silently ignore, show connect button as default
+  }
+})();
+</script>
 <!-- AI Insight Subtle Rail (Simplified for Auth context) -->
 <div class="mt-10 pt-8 border-t border-outline-variant/10 w-full">
 <div class="flex items-center gap-3 bg-tertiary-container/5 p-4 rounded-lg">
