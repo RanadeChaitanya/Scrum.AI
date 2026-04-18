@@ -2,9 +2,12 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Uplo
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.exception_handlers import http_exception_handler
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 import uuid
+import traceback
 from datetime import datetime
 from pathlib import Path
 
@@ -85,6 +88,69 @@ def _read_page(filename: str) -> str:
     return page_path.read_text(encoding="utf-8")
 
 
+def _read_404() -> str:
+    """Read the 404 page. Falls back to a minimal inline response if the file
+    is somehow missing so the error handler itself never crashes."""
+    page_path = PAGES_DIR / "404.html"
+    if page_path.exists():
+        return page_path.read_text(encoding="utf-8")
+    # Bare-bones fallback — should never be reached in normal operation
+    return (
+        "<!DOCTYPE html><html><head><title>404 - Not Found</title></head>"
+        "<body style='font-family:sans-serif;text-align:center;padding:4rem'>"
+        "<h1>404</h1><p>Page not found.</p>"
+        "<a href='/dashboard'>Go to Dashboard</a></body></html>"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Global exception handlers
+# ---------------------------------------------------------------------------
+@app.exception_handler(StarletteHTTPException)
+async def custom_404_handler(request: Request, exc: StarletteHTTPException):
+    """
+    Catches every HTTP error raised anywhere in the app.
+    - 404  → serve the custom 404 page with status 404
+    - 4xx  → serve the custom 404 page with the original status code
+    - 5xx  → serve the custom 404 page with status 500
+    API routes (paths starting with /api, /meeting, /audio, /video,
+    /trello/sync, /trello/lists, /ws) return JSON errors as before.
+    """
+    api_prefixes = ("/api", "/meeting", "/audio", "/video",
+                    "/trello/sync", "/trello/lists", "/ws")
+    if request.url.path.startswith(api_prefixes):
+        # Let FastAPI's default JSON handler deal with API errors
+        return await http_exception_handler(request, exc)
+
+    return HTMLResponse(
+        content=_read_404(),
+        status_code=exc.status_code,
+    )
+
+
+@app.exception_handler(Exception)
+async def global_runtime_error_handler(request: Request, exc: Exception):
+    """
+    Catches unhandled runtime exceptions on page routes and returns the
+    404 page with a 500 status so the browser still shows something useful.
+    API routes surface a JSON error instead.
+    """
+    api_prefixes = ("/api", "/meeting", "/audio", "/video",
+                    "/trello/sync", "/trello/lists", "/ws")
+    if request.url.path.startswith(api_prefixes):
+        tb = traceback.format_exc()
+        print(f"[ERROR] Unhandled exception on {request.url.path}:\n{tb}")
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error", "path": request.url.path},
+        )
+
+    tb = traceback.format_exc()
+    print(f"[ERROR] Unhandled exception on {request.url.path}:\n{tb}")
+    return HTMLResponse(content=_read_404(), status_code=500)
+
+
 # ---------------------------------------------------------------------------
 # Frontend page routes
 # ---------------------------------------------------------------------------
@@ -122,6 +188,12 @@ async def serve_scrum_report():
 async def serve_trello_auth():
     """Trello OAuth connection page."""
     return _read_page("trello-auth.html")
+
+
+@app.get("/404", response_class=HTMLResponse)
+async def serve_404():
+    """Explicit 404 page — also reachable as a direct URL."""
+    return HTMLResponse(content=_read_404(), status_code=404)
 
 
 # ---------------------------------------------------------------------------

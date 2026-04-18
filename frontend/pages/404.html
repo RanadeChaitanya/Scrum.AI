@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>404 - Page Not Found | ScrumAI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-fixed-variant": "#005236",
+                      "on-surface": "#191c1e",
+                      "inverse-surface": "#2d3133",
+                      "tertiary-container": "#27aef3",
+                      "on-error-container": "#93000a",
+                      "surface-dim": "#d8dadc",
+                      "secondary-container": "#6cf8bb",
+                      "primary-container": "#14b8a6",
+                      "surface-container-high": "#e6e8ea",
+                      "on-secondary": "#ffffff",
+                      "on-tertiary-fixed": "#001e2f",
+                      "on-tertiary-container": "#003e5c",
+                      "on-primary-container": "#00423b",
+                      "surface-container-highest": "#e0e3e5",
+                      "outline": "#6c7a77",
+                      "primary-fixed": "#71f8e4",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-low": "#f2f4f6",
+                      "surface-bright": "#f7f9fb",
+                      "on-background": "#191c1e",
+                      "on-error": "#ffffff",
+                      "on-secondary-container": "#00714d",
+                      "primary-fixed-dim": "#4fdbc8",
+                      "secondary-fixed": "#6ffbbe",
+                      "outline-variant": "#bbcac6",
+                      "tertiary-fixed": "#c9e6ff",
+                      "surface-tint": "#006b5f",
+                      "surface-container": "#eceef0",
+                      "on-tertiary-fixed-variant": "#004c6e",
+                      "on-primary": "#ffffff",
+                      "inverse-primary": "#4fdbc8",
+                      "tertiary-fixed-dim": "#89ceff",
+                      "surface": "#f7f9fb",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#eff1f3",
+                      "tertiary": "#006591",
+                      "primary": "#006b5f",
+                      "surface-variant": "#e0e3e5",
+                      "secondary-fixed-dim": "#4edea3",
+                      "on-surface-variant": "#3c4947",
+                      "on-primary-fixed": "#00201c",
+                      "secondary": "#006c49",
+                      "on-tertiary": "#ffffff",
+                      "on-primary-fixed-variant": "#005048",
+                      "background": "#f7f9fb",
+                      "on-secondary-fixed": "#002113",
+                      "error": "#ba1a1a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Space Grotesk"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .pulse-gradient {
+            background: linear-gradient(135deg, #006b5f 0%, #14b8a6 100%);
+        }
+        .sidebar-active {
+            background-color: #f2f4f6;
+            color: #006b5f;
+            border-right: 3px solid #006b5f;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex">
+<!-- Sidebar Navigation -->
+<aside class="fixed inset-y-0 left-0 w-64 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col z-50">
+<div class="p-6">
+<span class="text-2xl font-bold bg-gradient-to-br from-teal-700 to-teal-400 bg-clip-text text-transparent">ScrumAI</span>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="/dashboard">
+<span class="material-symbols-outlined group-hover:text-primary">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="/scrum-report">
+<span class="material-symbols-outlined group-hover:text-primary">bolt</span>
+<span class="font-medium">Active Sprints</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="/history">
+<span class="material-symbols-outlined group-hover:text-primary">analytics</span>
+<span class="font-medium">Team Insights</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="/trello-auth">
+<span class="material-symbols-outlined group-hover:text-primary">psychology</span>
+<span class="font-medium">AI Configuration</span>
+</a>
+</nav>
+<div class="px-4 py-6 border-t border-outline-variant/30 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="/profile">
+<span class="material-symbols-outlined group-hover:text-primary">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors group" href="/">
+<span class="material-symbols-outlined group-hover:text-primary">info</span>
+<span class="font-medium">About Us</span>
+</a>
+<div class="mt-4 pt-4 border-t border-outline-variant/10 flex items-center gap-3 px-4 py-2">
+<div class="h-10 w-10 rounded-full overflow-hidden bg-slate-200 ring-2 ring-primary/10">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh2QBnuwSM8fqAHtQgQcoxjEGe5ZwuRaLgHzniUeiKw49xmB1Z1m2sJg6f5-DmmdhefoWydwW_ecqToCAbmSxPs8kG6TcHqh2Usy_uXPLzRB7_2tpsQqcQOh4ktF0yKloyPZAjMkuA5ME_a1HsCrJlN9OdZ6L5m_YTRg7wCnYBbNllOkpVxaBs5sIAnSFdfatNuxSsQ01zAzM8g2PHl5yhT3eI6cllNz_-utXD0lExbe_gX6-YAvGc048i2GesTQ5_1mRDVqpSgQ"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold text-on-surface truncate">Alex Rivera</p>
+<p class="text-xs text-on-surface-variant truncate">Product Owner</p>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 ml-64">
+<!-- Top Navigation -->
+<nav class="fixed top-0 right-0 left-64 z-40 bg-surface-bright/70 backdrop-blur-md border-b border-outline-variant/10 flex justify-between items-center px-8 py-3 h-16 pr-10">
+<div class="flex items-center gap-8">
+<div class="flex gap-8">
+<a class="text-slate-600 hover:text-teal-500 font-medium transition-colors duration-200" href="/dashboard">Meetings</a>
+<a class="text-slate-600 hover:text-teal-500 font-medium transition-colors duration-200" href="/scrum-report">Reports</a>
+<a class="text-slate-600 hover:text-teal-500 font-medium transition-colors duration-200" href="/history">History</a>
+</div>
+</div>
+<div class="flex items-center gap-6 flex-1 justify-end"><!-- Live Pulse -->
+<div class="flex items-center gap-2 px-4 py-1.5 bg-primary/10 rounded-full border border-primary/20">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+<span class="text-[10px] font-bold uppercase tracking-wider text-primary">Live Pulse</span>
+</div></div>
+</nav>
+<!-- Main Content Area -->
+<main class="pt-16 min-h-screen flex items-center justify-center p-6 relative overflow-hidden bg-surface">
+<!-- Decorative Background Elements -->
+<div class="absolute top-1/4 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="absolute bottom-1/4 -right-20 w-96 h-96 bg-tertiary-container/10 rounded-full blur-3xl"></div>
+<!-- 404 Card -->
+<div class="max-w-2xl w-full bg-surface-container-lowest rounded-2xl shadow-[0_32px_64px_-12px_rgba(25,28,30,0.06)] p-12 text-center relative z-10 border border-outline-variant/10">
+<!-- Illustration -->
+<div class="mb-8 inline-flex items-center justify-center relative">
+<div class="absolute inset-0 bg-primary/5 rounded-full scale-150 blur-xl"></div>
+<div class="relative w-32 h-32 flex items-center justify-center bg-surface-container-low rounded-2xl">
+<span class="material-symbols-outlined text-primary text-6xl" style="font-variation-settings: 'wght' 300;">find_in_page</span>
+<div class="absolute -bottom-2 -right-2 bg-error-container p-2 rounded-lg shadow-sm border-2 border-surface-container-lowest">
+<span class="material-symbols-outlined text-on-error-container text-xl">link_off</span>
+</div>
+</div>
+</div>
+<!-- Typography Stack -->
+<div class="space-y-4 mb-10">
+<h1 class="text-8xl md:text-9xl font-headline font-bold text-on-surface tracking-tighter leading-none">404</h1>
+<h2 class="text-2xl md:text-3xl font-headline font-semibold text-primary">Page Not Found</h2>
+<p class="text-on-surface-variant max-w-md mx-auto body-md">
+                        The page you’re looking for doesn’t exist or may have been moved to a different sprint.
+                    </p>
+</div>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-10">
+<button id="go-dashboard-btn"
+        class="pulse-gradient text-on-primary px-8 py-3.5 rounded-lg font-medium shadow-lg hover:shadow-primary/20 transition-all active:scale-95 flex items-center gap-2"
+        onclick="cancelRedirect(); window.location.href='/dashboard'">
+<span class="material-symbols-outlined text-sm">dashboard</span>
+  Go to Dashboard
+</button>
+<button class="px-8 py-3.5 rounded-lg font-medium text-primary border-2 border-primary/20 hover:bg-primary/5 transition-all active:scale-95 flex items-center gap-2"
+        onclick="cancelRedirect(); history.length > 1 ? history.back() : window.location.href='/'">
+<span class="material-symbols-outlined text-sm">arrow_back</span>
+  Go Back
+</button>
+</div>
+
+<!-- Countdown banner -->
+<div id="countdown-banner" class="flex items-center justify-center gap-2 text-on-surface-variant text-sm mb-6">
+<span class="material-symbols-outlined text-base text-primary">schedule</span>
+<span>Redirecting to Dashboard in
+  <span id="countdown-num" class="font-bold text-primary tabular-nums">7</span>s
+  &mdash;
+  <button class="underline hover:text-primary transition-colors" onclick="cancelRedirect()">cancel</button>
+</span>
+</div>
+
+<!-- Separator -->
+<div class="w-16 h-1 bg-surface-container-high mx-auto rounded-full mb-8"></div>
+<!-- Quirky Footer -->
+<div class="flex items-center justify-center gap-3 text-on-surface-variant/60 font-medium text-sm">
+<span class="material-symbols-outlined text-sm">inventory_2</span>
+<p class="italic tracking-tight font-label uppercase text-[10px]">Looks like this task got lost in the sprint backlog.</p>
+</div>
+</div>
+<!-- Intelligence Rail -->
+</main>
+</div>
+<!-- Mobile Navigation Shell -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest/90 backdrop-blur-md px-6 py-4 flex justify-around items-center z-50 border-t border-outline-variant/20">
+<span class="material-symbols-outlined text-on-surface-variant" onclick="window.location.href='/'">home</span>
+<span class="material-symbols-outlined text-on-surface-variant" onclick="window.location.href='/scrum-report'">bolt</span>
+<span class="material-symbols-outlined text-on-surface-variant" onclick="window.location.href='/history'">analytics</span>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">error</span>
+</div>
+
+<script>
+  // -----------------------------------------------------------------------
+  // Auto-redirect countdown — 7 seconds to /dashboard
+  // Cancels automatically if the user navigates away manually.
+  // -----------------------------------------------------------------------
+  const REDIRECT_TO   = '/dashboard';
+  const TOTAL_SECONDS = 7;
+
+  let remaining  = TOTAL_SECONDS;
+  let timerId    = null;
+  let cancelled  = false;
+
+  const numEl    = document.getElementById('countdown-num');
+  const bannerEl = document.getElementById('countdown-banner');
+
+  function tick() {
+    if (cancelled) return;
+    remaining -= 1;
+    if (numEl) numEl.textContent = remaining;
+    if (remaining <= 0) {
+      clearInterval(timerId);
+      // Fade out before navigating to avoid a flash
+      document.body.style.transition = 'opacity 0.3s ease';
+      document.body.style.opacity   = '0';
+      setTimeout(() => { window.location.href = REDIRECT_TO; }, 300);
+    }
+  }
+
+  function cancelRedirect() {
+    if (cancelled) return;
+    cancelled = true;
+    clearInterval(timerId);
+    if (bannerEl) {
+      bannerEl.innerHTML =
+        '<span class="material-symbols-outlined text-base text-on-surface-variant">timer_off</span>' +
+        '<span class="text-on-surface-variant/70">Auto-redirect cancelled.</span>';
+    }
+  }
+
+  // Start the countdown
+  timerId = setInterval(tick, 1000);
+
+  // Cancel if the user clicks any in-page link before the timer fires
+  document.addEventListener('click', function (e) {
+    const anchor = e.target.closest('a[href], button[onclick]');
+    if (anchor) cancelRedirect();
+  }, { once: false });
+
+  // Cancel if the page is about to unload for any reason other than our redirect
+  window.addEventListener('beforeunload', function () {
+    if (!cancelled) cancelRedirect();
+  });
+</script>
+</body></html>
